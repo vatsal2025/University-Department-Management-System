@@ -1,0 +1,9 @@
+server.port=8080
+spring.application.name=udiims-backend
+
+# Copy this file to application.properties and fill in your Supabase credentials
+supabase.url=https://<your-project-ref>.supabase.co
+supabase.anon-key=<your-supabase-anon-key>
+supabase.service-key=<your-supabase-service-role-key>
+
+logging.level.com.udiims=DEBUG
