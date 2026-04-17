@@ -2,8 +2,8 @@ server.port=8080
 spring.application.name=udiims-backend
 
 # Copy this file to application.properties and fill in your Supabase credentials
-supabase.url=https://<your-project-ref>.supabase.co
-supabase.anon-key=<your-supabase-anon-key>
-supabase.service-key=<your-supabase-service-role-key>
+supabase.url=https://ouphnfcovroazajlmvij.supabase.co
+supabase.anon-key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im91cGhuZmNvdnJvYXphamxtdmlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMTI1MDUsImV4cCI6MjA4OTU4ODUwNX0.NyQgJfbHSvsl72re-iRe4rpwbIMkrVUHLtukzMflwpY
+supabase.service-key=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im91cGhuZmNvdnJvYXphamxtdmlqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NDAxMjUwNSwiZXhwIjoyMDg5NTg4NTA1fQ.QB9RZwbp86Zz8HoyPpxKsL2Q-M_HUp_BwBIFSZ19xfM
 
 logging.level.com.udiims=DEBUG

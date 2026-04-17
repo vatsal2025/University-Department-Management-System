@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getInventory, addInventoryItem, updateInventoryItem, disposeInventoryItem } from '../../api/api';
+import { getIdValidationMessage } from '../../utils/idValidation';
 
 const CONDITIONS = ['new', 'good', 'fair', 'poor', 'disposed'];
 const EMPTY = { item_id: '', item_name: '', category: '', quantity: 1, location: '', condition: 'good', is_lab_item: false };
@@ -24,6 +25,13 @@ export default function InventoryManagement({ departmentId, isTechnical }) {
 
   const handleSave = async () => {
     setError('');
+    if (modal === 'add') {
+      const idError = getIdValidationMessage('inventory', form.item_id);
+      if (idError) {
+        setError(idError);
+        return;
+      }
+    }
     try {
       if (modal === 'add') await addInventoryItem({ ...form, quantity: parseInt(form.quantity) }, departmentId, isTechnical);
       else await updateInventoryItem(form.item_id, form);

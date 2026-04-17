@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { login } from '../api/api';
+import { getIdValidationMessage } from '../utils/idValidation';
 
 const ROLES = [
   { key: 'student', label: 'Student' },
@@ -21,13 +22,23 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!id.trim()) { setError('ID is required.'); return; }
+    if (role === 'student') {
+      const studentIdError = getIdValidationMessage('student', id);
+      if (studentIdError) {
+        setError(studentIdError);
+        return;
+      }
+    }
     setError(''); setLoading(true);
     try {
       const res = await login(role, id.trim(), password);
       loginUser(res.data);
       navigate(`/${res.data.role}`);
     } catch (err) {
-      const msg = err.response?.data?.error || 'Login failed. Please try again.';
+      const msg = err.response?.data?.error
+        || (err.code === 'ERR_NETWORK'
+          ? 'Backend is not running. Start the Spring Boot server on port 8080 and try again.'
+          : 'Login failed. Please try again.');
       setError(msg);
     } finally {
       setLoading(false);

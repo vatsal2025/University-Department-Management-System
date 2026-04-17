@@ -1,5 +1,6 @@
 package com.udiims.service;
 
+import com.udiims.util.IdValidationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +20,7 @@ public class SecretaryService {
 
     public Map<String, Object> addFaculty(Map<String, Object> body) throws Exception {
         String facultyId = (String) body.get("faculty_id");
+        IdValidationUtils.validateFacultyId(facultyId);
         Map<String, Object> existing = supabase.getSingle("faculty", "faculty_id=eq." + facultyId);
         if (existing != null) throw new RuntimeException("Faculty ID already exists.");
 
@@ -28,6 +30,7 @@ public class SecretaryService {
     }
 
     public Map<String, Object> updateFaculty(String facultyId, Map<String, Object> body) throws Exception {
+        IdValidationUtils.validateOptionalFacultyId(body.get("faculty_id"));
         List<Map<String, Object>> result = supabase.patch("faculty", "faculty_id=eq." + facultyId, body);
         return result.isEmpty() ? body : result.get(0);
     }
@@ -50,6 +53,7 @@ public class SecretaryService {
 
     public Map<String, Object> addProject(Map<String, Object> body) throws Exception {
         String projectId = (String) body.get("project_id");
+        IdValidationUtils.validateProjectId(projectId);
         Map<String, Object> existing = supabase.getSingle("projects", "project_id=eq." + projectId);
         if (existing != null) throw new RuntimeException("Project ID already exists.");
 
@@ -65,6 +69,7 @@ public class SecretaryService {
     }
 
     public Map<String, Object> updateProject(String projectId, Map<String, Object> body) throws Exception {
+        IdValidationUtils.validateOptionalProjectId(body.get("project_id"));
         List<Map<String, Object>> result = supabase.patch("projects", "project_id=eq." + projectId, body);
         return result.isEmpty() ? body : result.get(0);
     }
@@ -84,6 +89,7 @@ public class SecretaryService {
         }
 
         String itemId = (String) body.get("item_id");
+        IdValidationUtils.validateInventoryId(itemId);
         Map<String, Object> existing = supabase.getSingle("inventory", "item_id=eq." + itemId);
         if (existing != null) throw new RuntimeException("Item ID already exists.");
 
@@ -105,6 +111,7 @@ public class SecretaryService {
     }
 
     public Map<String, Object> updateInventoryItem(String itemId, Map<String, Object> body) throws Exception {
+        IdValidationUtils.validateOptionalInventoryId(body.get("item_id"));
         List<Map<String, Object>> result = supabase.patch("inventory", "item_id=eq." + itemId, body);
         return result.isEmpty() ? body : result.get(0);
     }

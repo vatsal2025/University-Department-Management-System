@@ -1,6 +1,9 @@
 package com.udiims.controller;
 
+import com.udiims.exception.InvalidCredentialsException;
+import com.udiims.exception.InvalidInputException;
 import com.udiims.service.AuthService;
+import com.udiims.util.IdValidationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +28,9 @@ public class AuthController {
         }
 
         try {
+            if ("student".equals(role)) {
+                IdValidationUtils.validateStudentId(id);
+            }
             Map<String, Object> result = switch (role) {
                 case "student" -> authService.loginStudent(id, password);
                 case "secretary" -> authService.loginSecretary(id, password);
@@ -33,9 +39,13 @@ public class AuthController {
             };
 
             if (result == null) {
-                return ResponseEntity.status(401).body(Map.of("error", "Invalid Roll Number"));
+                return ResponseEntity.status(401).body(Map.of("error", "Invalid ID"));
             }
             return ResponseEntity.ok(result);
+        } catch (InvalidInputException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (InvalidCredentialsException e) {
+            return ResponseEntity.status(401).body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(503).body(Map.of("error", "Service Unavailable. Please try again later."));
         }

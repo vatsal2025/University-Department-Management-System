@@ -39,6 +39,8 @@ public class SecretaryController {
     public ResponseEntity<?> updateFaculty(@PathVariable String facultyId, @RequestBody Map<String, Object> body) {
         try {
             return ResponseEntity.ok(secretaryService.updateFaculty(facultyId, body));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
         }
@@ -91,6 +93,8 @@ public class SecretaryController {
     public ResponseEntity<?> updateProject(@PathVariable String projectId, @RequestBody Map<String, Object> body) {
         try {
             return ResponseEntity.ok(secretaryService.updateProject(projectId, body));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
         }
@@ -124,6 +128,8 @@ public class SecretaryController {
     public ResponseEntity<?> updateInventoryItem(@PathVariable String itemId, @RequestBody Map<String, Object> body) {
         try {
             return ResponseEntity.ok(secretaryService.updateInventoryItem(itemId, body));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
         }

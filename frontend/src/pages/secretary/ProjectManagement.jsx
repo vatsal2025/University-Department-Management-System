@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getProjects, addProject, updateProject, getFaculty } from '../../api/api';
+import { getIdValidationMessage } from '../../utils/idValidation';
 
 const EMPTY = { project_id: '', project_title: '', faculty_id: '', project_budget: '', project_status: 'active', abstract: '', publication_link: '' };
 
@@ -29,6 +30,13 @@ export default function ProjectManagement({ departmentId }) {
 
   const handleSave = async () => {
     setError('');
+    if (modal === 'add') {
+      const idError = getIdValidationMessage('project', form.project_id);
+      if (idError) {
+        setError(idError);
+        return;
+      }
+    }
     try {
       const body = { ...form, department_id: departmentId, project_budget: parseFloat(form.project_budget) || 0 };
       if (modal === 'add') await addProject(body);

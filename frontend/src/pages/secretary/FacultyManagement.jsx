@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getFaculty, addFaculty, updateFaculty, deactivateFaculty, forceDeactivateFaculty } from '../../api/api';
+import { getIdValidationMessage } from '../../utils/idValidation';
 
 const EMPTY = { faculty_id: '', faculty_name: '', designation: '', department_name: '', specialization: '', active_status: true };
 
@@ -25,6 +26,13 @@ export default function FacultyManagement({ departmentId }) {
 
   const handleSave = async () => {
     setError('');
+    if (modal === 'add') {
+      const idError = getIdValidationMessage('faculty', form.faculty_id);
+      if (idError) {
+        setError(idError);
+        return;
+      }
+    }
     try {
       if (modal === 'add') await addFaculty(form);
       else await updateFaculty(form.faculty_id, form);
