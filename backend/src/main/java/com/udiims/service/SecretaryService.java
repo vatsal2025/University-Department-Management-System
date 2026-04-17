@@ -170,6 +170,8 @@ public class SecretaryService {
         String semesterTerm = (String) body.get("semester_term");
         String deptId = (String) body.get("department_id");
 
+        IdValidationUtils.validateCourseCode(courseCode, deptId);
+
         // Check duplicate
         Map<String, Object> existing = supabase.getSingle("courses",
                 "course_code=eq." + courseCode + "&semester_term=eq." + semesterTerm + "&department_id=eq." + deptId);
@@ -193,6 +195,9 @@ public class SecretaryService {
     }
 
     public Map<String, Object> updateCourseOffering(String courseCode, String semesterTerm, String deptId, Map<String, Object> body) throws Exception {
+        if (body.containsKey("course_code")) {
+            IdValidationUtils.validateCourseCode((String) body.get("course_code"), deptId);
+        }
         String filter = "course_code=eq." + courseCode + "&semester_term=eq." + semesterTerm + "&department_id=eq." + deptId;
         List<Map<String, Object>> result = supabase.patch("courses", filter, body);
         return result.isEmpty() ? body : result.get(0);

@@ -80,6 +80,21 @@ public class StudentService {
                 continue;
             }
 
+            // Check if there is an existing dropped registration to reactivate
+            Map<String, Object> droppedReg = supabase.getSingle("course_registrations",
+                    "student_id=eq." + studentId + "&course_code=eq." + code + "&semester_term=eq." + semesterTerm + "&registration_status=eq.dropped");
+            if (droppedReg != null) {
+                try {
+                    supabase.patch("course_registrations",
+                            "student_id=eq." + studentId + "&course_code=eq." + code + "&semester_term=eq." + semesterTerm + "&registration_status=eq.dropped",
+                            Map.of("registration_status", "active"));
+                    registered.add(code);
+                } catch (Exception e) {
+                    failed.add(code + " (DB error)");
+                }
+                continue;
+            }
+
             String regId = "REG-" + studentId + "-" + code + "-" + semesterTerm.replace(" ", "");
             Map<String, Object> reg = new HashMap<>();
             reg.put("registration_id", regId);

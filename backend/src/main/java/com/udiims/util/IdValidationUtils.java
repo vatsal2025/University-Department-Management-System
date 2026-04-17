@@ -62,4 +62,13 @@ public final class IdValidationUtils {
             throw new InvalidInputException(MESSAGES.get(key));
         }
     }
+
+    public static void validateCourseCode(String courseCode, String departmentId) {
+        if ("CSE".equalsIgnoreCase(departmentId)) {
+            Pattern csCoursePattern = Pattern.compile("^CS\\d+$");
+            if (courseCode == null || courseCode.isBlank() || !csCoursePattern.matcher(courseCode).matches()) {
+                throw new InvalidInputException("Course Code for CSE department must start with CS followed by numbers.");
+            }
+        }
+    }
 }
