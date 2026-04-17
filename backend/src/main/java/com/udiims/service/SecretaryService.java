@@ -72,7 +72,9 @@ public class SecretaryService {
     // UC-08: Inventory Management
 
     public List<Map<String, Object>> getInventory(String departmentId) throws Exception {
-        return supabase.getList("inventory", "assigned_department=eq." + departmentId + "&order=item_name.asc");
+        List<Map<String, Object>> items = supabase.getList("inventory",
+                "assigned_department=eq." + departmentId + "&order=item_name.asc");
+        return enrichInventoryWithLabIncharge(items);
     }
 
     public Map<String, Object> addInventoryItem(Map<String, Object> body, String departmentId, boolean isTechnical) throws Exception {
@@ -84,6 +86,17 @@ public class SecretaryService {
         String itemId = (String) body.get("item_id");
         Map<String, Object> existing = supabase.getSingle("inventory", "item_id=eq." + itemId);
         if (existing != null) throw new RuntimeException("Item ID already exists.");
+
+        // Validate lab_incharge_id if provided
+        String labInchargeId = (String) body.get("lab_incharge_id");
+        if (labInchargeId != null && !labInchargeId.isBlank()) {
+            if (!Boolean.TRUE.equals(isLabItem)) {
+                throw new RuntimeException("lab_incharge_id is only applicable for lab items (is_lab_item must be true).");
+            }
+            Map<String, Object> faculty = supabase.getSingle("faculty",
+                    "faculty_id=eq." + labInchargeId + "&active_status=eq.true");
+            if (faculty == null) throw new RuntimeException("Lab incharge faculty not found or inactive: " + labInchargeId);
+        }
 
         body.put("assigned_department", departmentId);
         body.putIfAbsent("condition", "new");
@@ -141,7 +154,8 @@ public class SecretaryService {
         if (semesterTerm != null && !semesterTerm.isEmpty()) {
             query += "&semester_term=eq." + semesterTerm;
         }
-        return supabase.getList("courses", query + "&order=course_code.asc");
+        List<Map<String, Object>> courses = supabase.getList("courses", query + "&order=course_code.asc");
+        return enrichCoursesWithFaculty(courses);
     }
 
     public Map<String, Object> addCourseOffering(Map<String, Object> body) throws Exception {
@@ -157,6 +171,14 @@ public class SecretaryService {
         Object creditHours = body.get("credit_hours");
         if (creditHours instanceof Number n && n.intValue() <= 0) {
             throw new RuntimeException("Credit hours must be positive.");
+        }
+
+        // Validate faculty_id if provided
+        String facultyId = (String) body.get("faculty_id");
+        if (facultyId != null && !facultyId.isBlank()) {
+            Map<String, Object> faculty = supabase.getSingle("faculty",
+                    "faculty_id=eq." + facultyId + "&active_status=eq.true");
+            if (faculty == null) throw new RuntimeException("Faculty not found or inactive: " + facultyId);
         }
 
         List<Map<String, Object>> result = supabase.post("courses", body);
@@ -182,5 +204,36 @@ public class SecretaryService {
     // Get department info
     public Map<String, Object> getDepartment(String departmentId) throws Exception {
         return supabase.getSingle("departments", "department_id=eq." + departmentId);
+    }
+
+    // Helper: attach faculty name/department to each course
+    private List<Map<String, Object>> enrichCoursesWithFaculty(List<Map<String, Object>> courses) throws Exception {
+        for (Map<String, Object> course : courses) {
+            String facultyId = (String) course.get("faculty_id");
+            if (facultyId != null && !facultyId.isBlank()) {
+                Map<String, Object> faculty = supabase.getSingle("faculty",
+                        "faculty_id=eq." + facultyId + "&select=faculty_id,faculty_name,designation,department_name");
+                if (faculty != null) {
+                    course.put("faculty_info", faculty);
+                }
+            }
+        }
+        return courses;
+    }
+
+    // Helper: attach lab incharge faculty info for lab items
+    private List<Map<String, Object>> enrichInventoryWithLabIncharge(List<Map<String, Object>> items) throws Exception {
+        for (Map<String, Object> item : items) {
+            Boolean isLabItem = (Boolean) item.getOrDefault("is_lab_item", false);
+            String inchargeId = (String) item.get("lab_incharge_id");
+            if (Boolean.TRUE.equals(isLabItem) && inchargeId != null && !inchargeId.isBlank()) {
+                Map<String, Object> faculty = supabase.getSingle("faculty",
+                        "faculty_id=eq." + inchargeId + "&select=faculty_id,faculty_name,designation,department_name");
+                if (faculty != null) {
+                    item.put("lab_incharge_info", faculty);
+                }
+            }
+        }
+        return items;
     }
 }

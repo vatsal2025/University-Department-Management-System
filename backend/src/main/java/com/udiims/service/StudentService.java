@@ -20,13 +20,25 @@ public class StudentService {
                 "student_id=eq." + studentId + "&select=student_id,student_name,program,semester,sgpa,cgpa,backlog_count,department_id,gpa_updated_timestamp");
     }
 
-    // UC-02: Course Registration — get available courses for semester
+    // UC-02: Course Registration — get available courses for semester with faculty info
     public List<Map<String, Object>> getAvailableCourses(String semesterTerm, String departmentId) throws Exception {
         String query = "semester_term=eq." + semesterTerm;
         if (departmentId != null && !departmentId.isEmpty()) {
             query += "&department_id=eq." + departmentId;
         }
-        return supabase.getList("courses", query);
+        List<Map<String, Object>> courses = supabase.getList("courses", query);
+        // Attach faculty info so students can see who teaches each course
+        for (Map<String, Object> course : courses) {
+            String facultyId = (String) course.get("faculty_id");
+            if (facultyId != null && !facultyId.isBlank()) {
+                Map<String, Object> faculty = supabase.getSingle("faculty",
+                        "faculty_id=eq." + facultyId + "&select=faculty_id,faculty_name,designation,department_name");
+                if (faculty != null) {
+                    course.put("faculty_info", faculty);
+                }
+            }
+        }
+        return courses;
     }
 
     // UC-02: Get student's current registrations

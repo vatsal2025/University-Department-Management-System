@@ -29,6 +29,10 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+# ─── Claude Code internal files ────────────────────────────
+.claude/
+.codebase-mcp/
+
 # ─── OS / Editor ───────────────────────────────────────────
 .DS_Store
 Thumbs.db

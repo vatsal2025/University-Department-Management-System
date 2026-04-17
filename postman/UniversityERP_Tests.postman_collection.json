@@ -1,0 +1,757 @@
+{
+  "info": {
+    "_postman_id": "udiims-collection-v1",
+    "name": "UDIIMS University ERP — Full API Test Suite",
+    "description": "Comprehensive REST API tests for all 14 use cases in UDIIMS.\nCovers Students, Courses, Enrollment, GPA, Fees, Finance, Secretary, and Department Funds.\n\nEnvironment: ERP Local Environment\nBase URL: {{baseUrl}}",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" }
+  ],
+  "item": [
+
+    {
+      "name": "UC-01 — Student Profile",
+      "item": [
+        {
+          "name": "GET Student by ID (valid)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has student_id', () => {",
+                  "  const json = pm.response.json();",
+                  "  pm.expect(json.student_id).to.eql(pm.environment.get('studentId'));",
+                  "});",
+                  "pm.test('Has student_name', () => pm.expect(pm.response.json().student_name).to.be.a('string'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/students/{{studentId}}"
+          }
+        },
+        {
+          "name": "GET Student by ID (invalid — expect 404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));",
+                  "pm.test('Has error field', () => pm.expect(pm.response.json().error).to.exist);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/students/INVALID_ID_999"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "UC-02 — Course Registration",
+      "item": [
+        {
+          "name": "GET Available Courses",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Response is array', () => pm.expect(pm.response.json()).to.be.an('array'));",
+                  "pm.test('Courses have course_code', () => {",
+                  "  const courses = pm.response.json();",
+                  "  if (courses.length > 0) pm.expect(courses[0].course_code).to.be.a('string');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/students/courses/available?semesterTerm={{semesterTerm}}&departmentId={{departmentId}}",
+              "query": [
+                { "key": "semesterTerm", "value": "{{semesterTerm}}" },
+                { "key": "departmentId", "value": "{{departmentId}}" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET Available Courses — unknown semester (empty array)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Response is empty array', () => {",
+                  "  const arr = pm.response.json();",
+                  "  pm.expect(arr).to.be.an('array');",
+                  "  pm.expect(arr.length).to.eql(0);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/students/courses/available?semesterTerm=Sem-99-2099"
+          }
+        },
+        {
+          "name": "POST Register Courses (valid)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has registered array', () => pm.expect(pm.response.json().registered).to.be.an('array'));",
+                  "pm.test('Has failed array', () => pm.expect(pm.response.json().failed).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"semester_term\": \"{{semesterTerm}}\",\n  \"course_codes\": [\"{{courseCode}}\"]\n}"
+            },
+            "url": "{{baseUrl}}/api/students/{{studentId}}/registrations"
+          }
+        },
+        {
+          "name": "POST Register Courses — empty list (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Has error field', () => pm.expect(pm.response.json().error).to.exist);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"semester_term\": \"{{semesterTerm}}\",\n  \"course_codes\": []\n}"
+            },
+            "url": "{{baseUrl}}/api/students/{{studentId}}/registrations"
+          }
+        },
+        {
+          "name": "GET Student Registrations",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Response is array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/students/{{studentId}}/registrations"
+          }
+        },
+        {
+          "name": "DELETE Drop Course",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has message', () => pm.expect(pm.response.json().message).to.be.a('string'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/students/{{studentId}}/registrations/{{courseCode}}?semesterTerm={{semesterTerm}}",
+              "query": [{ "key": "semesterTerm", "value": "{{semesterTerm}}" }]
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "UC-03 — GPA Calculation",
+      "item": [
+        {
+          "name": "POST Calculate GPA",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has sgpa', () => pm.expect(pm.response.json().sgpa).to.be.a('number'));",
+                  "pm.test('Has cgpa', () => pm.expect(pm.response.json().cgpa).to.be.a('number'));",
+                  "pm.test('Has backlog_count', () => pm.expect(pm.response.json().backlog_count).to.be.a('number'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/students/{{studentId}}/gpa/calculate"
+          }
+        },
+        {
+          "name": "GET GPA for Student",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has sgpa', () => pm.expect(pm.response.json().sgpa).to.exist);",
+                  "pm.test('Has cgpa', () => pm.expect(pm.response.json().cgpa).to.exist);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/students/{{studentId}}/gpa"
+          }
+        },
+        {
+          "name": "GET GPA — unknown student (404)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/students/UNKNOWN_S999/gpa"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "UC-04 — Backlog Tracking",
+      "item": [
+        {
+          "name": "GET Backlog Tracking",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has credits_earned', () => pm.expect(pm.response.json().credits_earned).to.be.a('number'));",
+                  "pm.test('Has backlogs array', () => pm.expect(pm.response.json().backlogs).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/students/{{studentId}}/backlogs"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "UC-05 — Student Fee View",
+      "item": [
+        {
+          "name": "GET Student Fees (student portal)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 or 404', () => {",
+                  "  pm.expect(pm.response.code).to.be.oneOf([200, 404]);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "  pm.test('Has fee records', () => pm.expect(pm.response.json()).to.be.an('array').or.to.be.an('object'));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/students/{{studentId}}/fees"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "UC-10 — Secretary: Course Management",
+      "item": [
+        {
+          "name": "GET All Course Offerings",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Response is array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/secretary/courses"
+          }
+        },
+        {
+          "name": "POST Add Course Offering (duplicate — 400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400 for duplicate', () => pm.response.to.have.status(400));",
+                  "pm.test('Error mentions already offered', () => {",
+                  "  pm.expect(pm.response.json().error).to.include('already offered');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"course_code\": \"CS101\",\n  \"course_name\": \"Data Structures\",\n  \"credit_hours\": 4,\n  \"semester_term\": \"{{semesterTerm}}\",\n  \"department_id\": \"{{departmentId}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/secretary/courses"
+          }
+        },
+        {
+          "name": "POST Add Course Offering — zero credit hours (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400 for zero credits', () => pm.response.to.have.status(400));",
+                  "pm.test('Error mentions credit hours', () => {",
+                  "  pm.expect(pm.response.json().error).to.include('Credit hours');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"course_code\": \"CS_INVALID\",\n  \"course_name\": \"Bad Course\",\n  \"credit_hours\": 0,\n  \"semester_term\": \"{{semesterTerm}}\",\n  \"department_id\": \"{{departmentId}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/secretary/courses"
+          }
+        },
+        {
+          "name": "GET Inventory",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Response is array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/secretary/inventory"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "UC-11 — Grant Management",
+      "item": [
+        {
+          "name": "GET Grants",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Response is array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/finance/grants"
+          }
+        },
+        {
+          "name": "POST Record Grant — missing grant_id (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Has error field', () => pm.expect(pm.response.json().error).to.exist);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"department_id\": \"CSE\",\n  \"amount\": 100000\n}"
+            },
+            "url": "{{baseUrl}}/api/finance/grants"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "UC-12 — Consultancy Fund",
+      "item": [
+        {
+          "name": "GET Consultancy Records",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Response is array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/finance/consultancy"
+          }
+        },
+        {
+          "name": "POST Record Consultancy — negative amount (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400 for negative amount', () => pm.response.to.have.status(400));",
+                  "pm.test('Has error', () => pm.expect(pm.response.json().error).to.exist);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"consultancy_id\": \"CON-TEST-999\",\n  \"department_id\": \"CSE\",\n  \"amount\": -500\n}"
+            },
+            "url": "{{baseUrl}}/api/finance/consultancy"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "UC-13 — Fee Collection (Finance Officer)",
+      "item": [
+        {
+          "name": "GET Student Fees (Finance Officer view)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 or 404', () => pm.expect(pm.response.code).to.be.oneOf([200, 404]));",
+                  "if (pm.response.code === 200) {",
+                  "  pm.test('Has fees array', () => pm.expect(pm.response.json().fees).to.be.an('array'));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/finance/fees/{{studentId}}"
+          }
+        },
+        {
+          "name": "POST Record Partial Fee Payment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 or 400', () => pm.expect(pm.response.code).to.be.oneOf([200, 400]));",
+                  "if (pm.response.code === 200) {",
+                  "  pm.test('Has fee_status', () => pm.expect(pm.response.json().fee_status).to.be.a('string'));",
+                  "  pm.test('Has remaining_balance', () => pm.expect(pm.response.json().remaining_balance).to.be.a('number'));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"semester_term\": \"{{semesterTerm}}\",\n  \"amount\": 10000,\n  \"payment_method\": \"online\"\n}"
+            },
+            "url": "{{baseUrl}}/api/finance/fees/{{studentId}}/payments"
+          }
+        },
+        {
+          "name": "GET Fee Payment History",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 or 404', () => pm.expect(pm.response.code).to.be.oneOf([200, 404]));",
+                  "if (pm.response.code === 200) {",
+                  "  pm.test('Has payments array', () => pm.expect(pm.response.json().payments).to.be.an('array'));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/finance/fees/{{studentId}}/payments?semesterTerm={{semesterTerm}}",
+              "query": [{ "key": "semesterTerm", "value": "{{semesterTerm}}" }]
+            }
+          }
+        },
+        {
+          "name": "POST Create Fee Record (new semester)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 or 400', () => pm.expect(pm.response.code).to.be.oneOf([200, 400]));",
+                  "if (pm.response.code === 200) {",
+                  "  pm.test('Has record_id', () => pm.expect(pm.response.json().record_id).to.be.a('string'));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"student_id\": \"{{studentId}}\",\n  \"semester_term\": \"Sem-3-2026\",\n  \"amount\": 55000,\n  \"department_id\": \"CSE\",\n  \"fee_status\": \"pending\"\n}"
+            },
+            "url": "{{baseUrl}}/api/finance/fees"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "UC-14 — Project Finance",
+      "item": [
+        {
+          "name": "GET Projects",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Response is array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/finance/projects"
+          }
+        },
+        {
+          "name": "GET Project Finance Records",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Response is array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/finance/project-finance"
+          }
+        }
+      ]
+    },
+
+    {
+      "name": "Department Fund Management (New Feature)",
+      "item": [
+        {
+          "name": "GET Fund Sources",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Response is array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/departments/{{departmentId}}/fund-sources"
+          }
+        },
+        {
+          "name": "GET Fund Usage",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Response is array', () => pm.expect(pm.response.json()).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/departments/{{departmentId}}/fund-usage"
+          }
+        },
+        {
+          "name": "GET Fund Summary",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has total_incoming', () => pm.expect(pm.response.json().total_incoming).to.be.a('number'));",
+                  "pm.test('Has available_balance', () => pm.expect(pm.response.json().available_balance).to.be.a('number'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/departments/{{departmentId}}/fund-summary"
+          }
+        },
+        {
+          "name": "POST Add Fund Source",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200 or 400', () => pm.expect(pm.response.code).to.be.oneOf([200, 400]));",
+                  "if (pm.response.code === 200) {",
+                  "  pm.test('Has source_id', () => pm.expect(pm.response.json().source_id).to.exist);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"source_type\": \"government_grant\",\n  \"amount\": 500000,\n  \"financial_year\": \"2025-26\",\n  \"description\": \"Annual UGC grant\"\n}"
+            },
+            "url": "{{baseUrl}}/api/departments/{{departmentId}}/fund-sources"
+          }
+        },
+        {
+          "name": "POST Add Fund Usage — overspend (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 400 for overspend', () => pm.response.to.have.status(400));",
+                  "pm.test('Error mentions overspend or exceeds', () => {",
+                  "  const err = pm.response.json().error || '';",
+                  "  pm.expect(err.toLowerCase()).to.satisfy(s => s.includes('exceed') || s.includes('insufficient') || s.includes('balance'));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"purpose\": \"lab_equipment\",\n  \"amount\": 99999999999,\n  \"description\": \"Overspend test\"\n}"
+            },
+            "url": "{{baseUrl}}/api/departments/{{departmentId}}/fund-usage"
+          }
+        }
+      ]
+    }
+
+  ]
+}

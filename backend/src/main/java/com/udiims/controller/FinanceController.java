@@ -97,6 +97,35 @@ public class FinanceController {
         }
     }
 
+    // UC-13 (NEW): Partial fee payment endpoints
+
+    @PostMapping("/fees/{studentId}/payments")
+    public ResponseEntity<?> recordFeePayment(
+            @PathVariable String studentId,
+            @RequestBody Map<String, Object> body) {
+        try {
+            body.put("student_id", studentId);
+            return ResponseEntity.ok(financeService.recordFeePayment(body));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/fees/{studentId}/payments")
+    public ResponseEntity<?> getFeePayments(
+            @PathVariable String studentId,
+            @RequestParam(required = false) String semesterTerm) {
+        try {
+            return ResponseEntity.ok(financeService.getFeePayments(studentId, semesterTerm));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404).body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+        }
+    }
+
     // UC-14: Project Financial Management
     @GetMapping("/projects")
     public ResponseEntity<?> getProjects(@RequestParam(required = false) String departmentId) {

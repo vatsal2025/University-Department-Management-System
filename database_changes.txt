@@ -1,0 +1,274 @@
+================================================================
+UDIIMS — DATABASE CHANGES DOCUMENTATION
+================================================================
+Date    : 2026-04-16
+Author  : UDIIMS Group 11 Feature Extension
+Purpose : Partial Fee Payments · Dept Fund Management ·
+          Course-Faculty Visibility · Lab Incharge Display
+================================================================
+
+
+----------------------------------------------------------------
+1. NEW TABLE: fee_structures
+----------------------------------------------------------------
+Purpose :  Defines the canonical total fee for each student per
+           semester. Acts as the reference against which partial
+           payments are validated.
+
+Fields :
+  structure_id  TEXT        PRIMARY KEY
+                            Format: FS-<student_id>-<semester_term>
+  student_id    TEXT        NOT NULL  FK → students(student_id)
+  semester_term TEXT        NOT NULL  e.g. "Sem-1-2025"
+  department_id TEXT        FK → departments(department_id)
+  total_fee     FLOAT       NOT NULL  CHECK (total_fee > 0)
+  created_at    TIMESTAMPTZ DEFAULT NOW()
+
+Constraints :
+  UNIQUE (student_id, semester_term)
+    → One fee definition per student per semester; prevents
+      duplicate fee structures being created.
+
+Relationships :
+  fee_structures.student_id   → students.student_id
+  fee_structures.department_id → departments.department_id
+
+Notes :
+  - Created automatically when a fee record is posted via
+    POST /api/finance/fees (createFeeRecord).
+  - fee_structures.total_fee is the ceiling for all payments
+    in fee_payments for the same (student_id, semester_term).
+
+
+----------------------------------------------------------------
+2. NEW TABLE: fee_payments
+----------------------------------------------------------------
+Purpose :  Records every individual installment/payment made by
+           a student towards their semester fee. Replaces the
+           assumption of single full payments.
+
+Fields :
+  payment_id     TEXT        PRIMARY KEY
+                             Format: FP-<student_id>-<epoch>
+  student_id     TEXT        NOT NULL  FK → students(student_id)
+  semester_term  TEXT        NOT NULL
+  amount         FLOAT       NOT NULL  CHECK (amount > 0)
+  payment_date   TIMESTAMPTZ DEFAULT NOW()
+  payment_method TEXT        CHECK IN ('cash','online','cheque','dd','upi')
+                             DEFAULT 'online'
+  notes          TEXT        Optional remarks
+
+Constraints :
+  Application-layer constraint (enforced in FinanceService):
+    SUM(fee_payments.amount WHERE student_id AND semester_term)
+    <= fee_structures.total_fee
+    → No overpayment allowed beyond the defined total fee.
+
+Relationships :
+  fee_payments.student_id → students.student_id
+
+Derived values (computed at query time, NOT stored):
+  amount_paid       = SUM(fee_payments.amount) for (student, semester)
+  remaining_balance = fee_structures.total_fee − amount_paid
+  fee_status        = 'paid' | 'partial' | 'pending'
+                      (auto-updated in financial_records after each payment)
+
+
+----------------------------------------------------------------
+3. NEW TABLE: department_fund_sources
+----------------------------------------------------------------
+Purpose :  Tracks all incoming money for a department (grants,
+           donations, research funding, etc.). Provides the
+           "where did money come from" traceability.
+
+Fields :
+  source_id     TEXT        PRIMARY KEY
+                            Format: DFS-<dept_id>-<epoch>
+  department_id TEXT        NOT NULL  FK → departments(department_id)
+  source_name   TEXT        NOT NULL  e.g. "Government Grant",
+                                      "Donation", "Research Funding"
+  amount        FLOAT       NOT NULL  CHECK (amount > 0)
+  received_date TIMESTAMPTZ DEFAULT NOW()
+  description   TEXT        Optional details
+
+Relationships :
+  department_fund_sources.department_id → departments(department_id)
+
+Notes :
+  - department balance = SUM(fund_sources) − SUM(fund_usage)
+    for the same department_id.
+
+
+----------------------------------------------------------------
+4. NEW TABLE: department_fund_usage
+----------------------------------------------------------------
+Purpose :  Tracks all expenditures by a department. Provides the
+           "where was money spent" traceability.
+
+Fields :
+  usage_id      TEXT        PRIMARY KEY
+                            Format: DFU-<dept_id>-<epoch>
+  department_id TEXT        NOT NULL  FK → departments(department_id)
+  amount        FLOAT       NOT NULL  CHECK (amount > 0)
+  usage_date    TIMESTAMPTZ DEFAULT NOW()
+  purpose       TEXT        NOT NULL
+                            CHECK IN ('lab_equipment','maintenance',
+                                      'events','salaries','research','other')
+  description   TEXT        Optional details
+
+Constraints :
+  Application-layer constraint (enforced in DepartmentFundService):
+    new expenditure amount <= available_balance
+    where available_balance =
+      SUM(department_fund_sources.amount WHERE dept)
+    − SUM(department_fund_usage.amount   WHERE dept)
+    → Spending cannot exceed the available balance.
+
+Relationships :
+  department_fund_usage.department_id → departments(department_id)
+
+
+----------------------------------------------------------------
+5. MODIFIED TABLE: courses
+----------------------------------------------------------------
+Column added :
+  faculty_id  TEXT  REFERENCES faculty(faculty_id)  DEFAULT NULL
+
+Purpose : Links each course offering to the faculty member who
+          teaches it. Displayed to students during course
+          selection so they can see who teaches each course.
+
+Backward compatibility :
+  - Column is nullable; all existing course rows are unaffected
+    (faculty_id = NULL means "not yet assigned").
+  - The addCourseOffering() method now validates faculty_id if
+    provided but does not require it.
+
+Relationships :
+  courses.faculty_id → faculty(faculty_id)
+
+Seed data updated :
+  CS101 → F001 (Dr. Rajesh Kumar)
+  CS102 → F002 (Prof. Anjali Mehta)
+  CS201 → F002
+  CS301 → F001
+  PH101 → F003
+
+
+----------------------------------------------------------------
+6. MODIFIED TABLE: inventory
+----------------------------------------------------------------
+Column added :
+  lab_incharge_id  TEXT  REFERENCES faculty(faculty_id)  DEFAULT NULL
+
+Purpose : Stores the faculty member responsible for a lab.
+          Applicable only when is_lab_item = true. Displayed
+          wherever lab item/lab details are shown.
+
+Backward compatibility :
+  - Column is nullable; all existing inventory rows unaffected.
+  - Validation in addInventoryItem() ensures:
+      • lab_incharge_id can only be set when is_lab_item = true.
+      • Referenced faculty must be active.
+
+Relationships :
+  inventory.lab_incharge_id → faculty(faculty_id)
+
+Seed data updated :
+  INV001 (Dell Laptop, Lab 1)   → F001 (Dr. Rajesh Kumar)
+  INV004 (Oscilloscope, PHY Lab)→ F003 (Dr. Anil Verma)
+  Non-lab items                 → NULL
+
+
+----------------------------------------------------------------
+7. EXISTING TABLE: financial_records  (behaviour change)
+----------------------------------------------------------------
+No schema change. Behavioural change only:
+
+  fee_status  TEXT  CHECK IN ('paid','pending','partial','waived')
+    — 'partial' status was already in the schema but unused.
+    — Now AUTO-UPDATED by FinanceService.recordFeePayment():
+        After each payment:
+          if amount_paid >= total_fee  → 'paid'
+          if amount_paid  > 0          → 'partial'
+          else                         → 'pending'
+
+  amount field now represents total_fee (unchanged in storage),
+  while actual amounts paid are tracked in fee_payments.
+
+
+================================================================
+SUMMARY OF ALL CONSTRAINTS
+================================================================
+
+No-overpayment (fee_payments):
+  Application enforces:
+    SUM(payments for student+semester) + new_payment <= total_fee
+  Error message returned:
+    "Overpayment not allowed. Total fee: X, Already paid: Y,
+     Remaining: Z"
+
+No-overspend (department_fund_usage):
+  Application enforces:
+    new_expenditure <= SUM(fund_sources) − SUM(fund_usage)
+  Error message returned:
+    "Insufficient funds. Available balance: X, Requested: Y"
+
+Foreign key integrity:
+  - fee_payments.student_id        → students (enforced by DB)
+  - fee_structures.(student_id, dept) → students / departments
+  - fund_sources.department_id     → departments
+  - fund_usage.department_id       → departments
+  - courses.faculty_id             → faculty (nullable)
+  - inventory.lab_incharge_id      → faculty (nullable)
+
+Unique constraints:
+  - fee_structures: UNIQUE (student_id, semester_term)
+
+
+================================================================
+NEW API ENDPOINTS ADDED
+================================================================
+
+Partial Fee Payments:
+  POST   /api/finance/fees/{studentId}/payments
+         Body: { semester_term, amount, payment_method?, notes? }
+         → Records an installment; auto-updates fee_status
+         → Returns: payment record + total_fee, amount_paid,
+                    remaining_balance, fee_status
+
+  GET    /api/finance/fees/{studentId}/payments?semesterTerm=
+         → Returns all payments + running balance summary
+
+  GET    /api/finance/fees/{studentId}   (EXTENDED)
+         → Now includes per-semester: total_fee, amount_paid,
+           remaining_balance, payment_records[]
+
+Department Fund Management:
+  GET    /api/departments/{departmentId}/fund-sources
+  POST   /api/departments/{departmentId}/fund-sources
+         Body: { source_name, amount, received_date?, description? }
+
+  GET    /api/departments/{departmentId}/fund-usage
+  POST   /api/departments/{departmentId}/fund-usage
+         Body: { amount, purpose, usage_date?, description? }
+         → Blocked if amount > available_balance
+
+  GET    /api/departments/{departmentId}/fund-summary
+         → Returns: total_incoming, total_spent, available_balance,
+                    fund_sources[], fund_usage[]
+
+Course-Faculty Visibility (transparent enrichment — no new endpoints):
+  GET    /api/students/courses/available?semesterTerm=&departmentId=
+  GET    /api/secretary/courses?departmentId=&semesterTerm=
+         → Both now return faculty_info { faculty_id, faculty_name,
+             designation, department_name } when a faculty is linked.
+
+Lab Incharge (transparent enrichment — no new endpoints):
+  GET    /api/secretary/inventory?departmentId=
+         → Lab items now include lab_incharge_info { faculty_id,
+             faculty_name, designation, department_name }
+
+================================================================
+END OF DATABASE CHANGES DOCUMENTATION
+================================================================

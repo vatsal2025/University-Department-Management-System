@@ -90,8 +90,33 @@ public class FinanceService {
         List<Map<String, Object>> fees = supabase.getList("financial_records",
                 "student_id=eq." + studentId + "&record_type=eq.student-fee&order=semester_term.asc");
 
+        // Attach partial-payment summary for each semester
+        List<Map<String, Object>> feeSummaries = new ArrayList<>();
+        for (Map<String, Object> fee : fees) {
+            String semesterTerm = (String) fee.get("semester_term");
+            Map<String, Object> summary = new HashMap<>(fee);
+
+            // Get fee structure (total fee)
+            Map<String, Object> structure = supabase.getSingle("fee_structures",
+                    "student_id=eq." + studentId + "&semester_term=eq." + semesterTerm);
+            double totalFee = structure != null && structure.get("total_fee") instanceof Number n
+                    ? n.doubleValue() : (fee.get("amount") instanceof Number n2 ? n2.doubleValue() : 0);
+
+            // Sum all payments for this semester
+            List<Map<String, Object>> payments = supabase.getList("fee_payments",
+                    "student_id=eq." + studentId + "&semester_term=eq." + semesterTerm + "&order=payment_date.asc");
+            double amountPaid = payments.stream()
+                    .mapToDouble(p -> p.get("amount") instanceof Number n ? n.doubleValue() : 0).sum();
+
+            summary.put("total_fee", totalFee);
+            summary.put("amount_paid", amountPaid);
+            summary.put("remaining_balance", totalFee - amountPaid);
+            summary.put("payment_records", payments);
+            feeSummaries.add(summary);
+        }
+
         Map<String, Object> result = new HashMap<>(student);
-        result.put("fees", fees);
+        result.put("fees", feeSummaries);
         return result;
     }
 
@@ -118,10 +143,12 @@ public class FinanceService {
                 "student_id=eq." + studentId + "&record_type=eq.student-fee&semester_term=eq." + semesterTerm);
         if (existing != null) throw new RuntimeException("Fee record for this semester already exists.");
 
+        double totalFee = body.get("amount") instanceof Number n ? n.doubleValue() : 0;
+
         Map<String, Object> record = new HashMap<>();
         record.put("record_id", "FEE-" + studentId + "-" + semesterTerm.replace(" ", "") + "-" + Instant.now().toEpochMilli());
         record.put("record_type", "student-fee");
-        record.put("amount", body.get("amount"));
+        record.put("amount", totalFee);
         record.put("transaction_date", Instant.now().toString());
         record.put("student_id", studentId);
         record.put("semester_term", semesterTerm);
@@ -130,7 +157,108 @@ public class FinanceService {
         record.put("department_id", body.get("department_id"));
 
         List<Map<String, Object>> result = supabase.post("financial_records", record);
+
+        // Also create the fee_structure entry if not present
+        Map<String, Object> existingStructure = supabase.getSingle("fee_structures",
+                "student_id=eq." + studentId + "&semester_term=eq." + semesterTerm);
+        if (existingStructure == null) {
+            Map<String, Object> structure = new HashMap<>();
+            structure.put("structure_id", "FS-" + studentId + "-" + semesterTerm.replace(" ", ""));
+            structure.put("student_id", studentId);
+            structure.put("semester_term", semesterTerm);
+            structure.put("department_id", body.get("department_id"));
+            structure.put("total_fee", totalFee);
+            supabase.post("fee_structures", structure);
+        }
+
         return result.isEmpty() ? record : result.get(0);
+    }
+
+    // UC-13 (NEW): Record a partial/installment fee payment
+    public Map<String, Object> recordFeePayment(Map<String, Object> body) throws Exception {
+        String studentId = (String) body.get("student_id");
+        String semesterTerm = (String) body.get("semester_term");
+
+        if (studentId == null || studentId.isBlank()) throw new RuntimeException("student_id is required.");
+        if (semesterTerm == null || semesterTerm.isBlank()) throw new RuntimeException("semester_term is required.");
+
+        Map<String, Object> student = supabase.getSingle("students", "student_id=eq." + studentId);
+        if (student == null) throw new RuntimeException("Student not found.");
+
+        // Require a fee structure to exist
+        Map<String, Object> structure = supabase.getSingle("fee_structures",
+                "student_id=eq." + studentId + "&semester_term=eq." + semesterTerm);
+        if (structure == null) throw new RuntimeException("No fee structure found for this student and semester. Create a fee record first.");
+
+        double totalFee = structure.get("total_fee") instanceof Number n ? n.doubleValue() : 0;
+
+        // Sum existing payments
+        List<Map<String, Object>> existing = supabase.getList("fee_payments",
+                "student_id=eq." + studentId + "&semester_term=eq." + semesterTerm);
+        double alreadyPaid = existing.stream()
+                .mapToDouble(p -> p.get("amount") instanceof Number n ? n.doubleValue() : 0).sum();
+
+        double newAmount = body.get("amount") instanceof Number n ? n.doubleValue() : 0;
+        if (newAmount <= 0) throw new RuntimeException("Payment amount must be positive.");
+        if (alreadyPaid + newAmount > totalFee) {
+            throw new RuntimeException(String.format(
+                    "Overpayment not allowed. Total fee: %.2f, Already paid: %.2f, Remaining: %.2f",
+                    totalFee, alreadyPaid, totalFee - alreadyPaid));
+        }
+
+        String paymentMethod = (String) body.getOrDefault("payment_method", "online");
+        Map<String, Object> payment = new HashMap<>();
+        payment.put("payment_id", "FP-" + studentId + "-" + Instant.now().toEpochMilli());
+        payment.put("student_id", studentId);
+        payment.put("semester_term", semesterTerm);
+        payment.put("amount", newAmount);
+        payment.put("payment_date", body.getOrDefault("payment_date", Instant.now().toString()));
+        payment.put("payment_method", paymentMethod);
+        payment.put("notes", body.getOrDefault("notes", ""));
+
+        List<Map<String, Object>> result = supabase.post("fee_payments", payment);
+
+        // Automatically update fee_status in financial_records
+        double totalPaidAfter = alreadyPaid + newAmount;
+        String newStatus = (totalPaidAfter >= totalFee) ? "paid"
+                : (totalPaidAfter > 0) ? "partial" : "pending";
+        updateFeeStatus(studentId, semesterTerm, newStatus);
+
+        Map<String, Object> response = result.isEmpty() ? payment : result.get(0);
+        response.put("total_fee", totalFee);
+        response.put("amount_paid", totalPaidAfter);
+        response.put("remaining_balance", totalFee - totalPaidAfter);
+        response.put("fee_status", newStatus);
+        return response;
+    }
+
+    // UC-13 (NEW): Get all payment records for a student/semester
+    public Map<String, Object> getFeePayments(String studentId, String semesterTerm) throws Exception {
+        Map<String, Object> student = supabase.getSingle("students", "student_id=eq." + studentId + "&select=student_id,student_name");
+        if (student == null) throw new RuntimeException("Student not found.");
+
+        String query = "student_id=eq." + studentId + "&order=payment_date.asc";
+        if (semesterTerm != null && !semesterTerm.isBlank()) {
+            query = "student_id=eq." + studentId + "&semester_term=eq." + semesterTerm + "&order=payment_date.asc";
+        }
+        List<Map<String, Object>> payments = supabase.getList("fee_payments", query);
+
+        // Also get structure for balance
+        Map<String, Object> structure = semesterTerm != null
+                ? supabase.getSingle("fee_structures", "student_id=eq." + studentId + "&semester_term=eq." + semesterTerm)
+                : null;
+
+        double totalFee = structure != null && structure.get("total_fee") instanceof Number n ? n.doubleValue() : 0;
+        double amountPaid = payments.stream()
+                .mapToDouble(p -> p.get("amount") instanceof Number n ? n.doubleValue() : 0).sum();
+
+        Map<String, Object> result = new HashMap<>(student);
+        result.put("semester_term", semesterTerm);
+        result.put("total_fee", totalFee);
+        result.put("amount_paid", amountPaid);
+        result.put("remaining_balance", totalFee - amountPaid);
+        result.put("payments", payments);
+        return result;
     }
 
     // UC-14: Project Financial Management
