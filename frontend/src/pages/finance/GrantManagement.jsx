@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { getGrants, recordGrant } from '../../api/api';
 
-const EMPTY = { grant_id: '', amount: '', transaction_date: new Date().toISOString().split('T')[0], department_id: '' };
+const GRANT_ID_REGEX = /^GRANT-[A-Za-z0-9]+-\d+$/;
+const EMPTY = { grant_id: '', amount: '', transaction_date: new Date().toISOString().split('T')[0], department_id: '', description: '' };
 
 export default function GrantManagement() {
   const [grants, setGrants] = useState([]);
@@ -23,6 +24,15 @@ export default function GrantManagement() {
 
   const handleSubmit = async (e) => {
     e.preventDefault(); setError('');
+    if (!GRANT_ID_REGEX.test(form.grant_id)) {
+      setError('Grant ID must follow the format: GRANT-<DepartmentName>-<Number> (e.g. GRANT-CSE-001).');
+      return;
+    }
+    const idDeptSegment = form.grant_id.split('-')[1];
+    if (idDeptSegment.toUpperCase() !== form.department_id.trim().toUpperCase()) {
+      setError(`Grant ID department segment "${idDeptSegment}" must match the selected Department ID "${form.department_id}".`);
+      return;
+    }
     try {
       await recordGrant({ ...form, amount: parseFloat(form.amount) });
       setSuccess('Grant recorded successfully.');
@@ -36,7 +46,7 @@ export default function GrantManagement() {
     <div>
       <div className="section-header">
         <h3>Grant Management — UC-11</h3>
-        <button className="btn btn-primary" onClick={() => { setShowForm(!showForm); setError(''); }}>
+        <button className="btn btn-primary" onClick={() => { setShowForm(!showForm); setError(''); setSuccess(''); }}>
           {showForm ? 'Cancel' : '+ Record Grant'}
         </button>
       </div>
@@ -50,7 +60,13 @@ export default function GrantManagement() {
             <div className="form-row">
               <div className="form-group">
                 <label>Grant ID *</label>
-                <input value={form.grant_id} onChange={e => setForm(p => ({ ...p, grant_id: e.target.value }))} required />
+                <input
+                  value={form.grant_id}
+                  onChange={e => setForm(p => ({ ...p, grant_id: e.target.value }))}
+                  placeholder="e.g. GRANT-CSE-001"
+                  required
+                />
+                <small style={{ color: '#6b7280' }}>Format: GRANT-&lt;DepartmentName&gt;-&lt;Number&gt;</small>
               </div>
               <div className="form-group">
                 <label>Department ID *</label>
@@ -66,6 +82,23 @@ export default function GrantManagement() {
                 <label>Transaction Date *</label>
                 <input type="date" value={form.transaction_date} onChange={e => setForm(p => ({ ...p, transaction_date: e.target.value }))} />
               </div>
+            </div>
+            <div className="form-group">
+              <label>Description</label>
+              <textarea
+                value={form.description}
+                onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
+                rows={5}
+                placeholder={
+                  'Grant Title: [official title of the grant]\n' +
+                  'Funding Agency: [DST / UGC / SERB / Industry / etc.]\n' +
+                  'Principal Investigator: [faculty name]\n' +
+                  'Allocated To: [faculty / lab / unit / department]\n' +
+                  'Objectives: [brief purpose of the grant]\n' +
+                  'Grant Period: [start date] to [end date]'
+                }
+                style={{ resize: 'vertical' }}
+              />
             </div>
             <button type="submit" className="btn btn-primary">Record Grant</button>
           </form>
@@ -97,15 +130,16 @@ export default function GrantManagement() {
         <div className="card">
           <div className="table-wrapper">
             <table>
-              <thead><tr><th>Grant ID</th><th>Department</th><th>Amount (₹)</th><th>Date</th></tr></thead>
+              <thead><tr><th>Grant ID</th><th>Department</th><th>Amount (₹)</th><th>Date</th><th>Description</th></tr></thead>
               <tbody>
-                {grants.length === 0 ? <tr><td colSpan={4}><div className="empty-state">No grants recorded.</div></td></tr>
+                {grants.length === 0 ? <tr><td colSpan={5}><div className="empty-state">No grants recorded.</div></td></tr>
                   : grants.map(g => (
                     <tr key={g.record_id}>
                       <td>{g.grant_id}</td>
                       <td>{g.department_id}</td>
                       <td>₹{Number(g.amount).toLocaleString()}</td>
                       <td>{g.transaction_date ? new Date(g.transaction_date).toLocaleDateString() : '—'}</td>
+                      <td style={{ whiteSpace: 'pre-line', maxWidth: 320 }}>{g.description || '—'}</td>
                     </tr>
                   ))}
               </tbody>

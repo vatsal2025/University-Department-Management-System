@@ -203,15 +203,59 @@ INSERT INTO courses VALUES ('CS301', 'Machine Learning', 4, 'Sem-2-2025', 'CSE',
 INSERT INTO courses VALUES ('CS302', 'Operating Systems', 3, 'Sem-2-2025', 'CSE', NULL) ON CONFLICT DO NOTHING;
 INSERT INTO courses VALUES ('PH101', 'Mechanics', 4, 'Sem-1-2025', 'PHY', 'F003') ON CONFLICT DO NOTHING;
 
--- Course Registrations (D2) — with grades for GPA testing
+-- Course Registrations (D2)
+-- S001: Aarav Sharma — B.Tech CSE, Semester 4, 1 backlog
+-- Sem 1 (Sem-1-2024)
 INSERT INTO course_registrations VALUES ('REG001', 'S001', 'CS101', 'Data Structures', 'Sem-1-2024', 4, 'completed', false, 'A') ON CONFLICT DO NOTHING;
-INSERT INTO course_registrations VALUES ('REG002', 'S001', 'CS102', 'Algorithms', 'Sem-1-2024', 4, 'completed', false, 'B') ON CONFLICT DO NOTHING;
-INSERT INTO course_registrations VALUES ('REG003', 'S001', 'CS201', 'Database Systems', 'Sem-2-2024', 3, 'completed', true, 'F') ON CONFLICT DO NOTHING;
-INSERT INTO course_registrations VALUES ('REG004', 'S002', 'CS101', 'Data Structures', 'Sem-1-2024', 4, 'completed', false, 'B-') ON CONFLICT DO NOTHING;
-INSERT INTO course_registrations VALUES ('REG005', 'S002', 'CS102', 'Algorithms', 'Sem-1-2024', 4, 'completed', false, 'C') ON CONFLICT DO NOTHING;
+INSERT INTO course_registrations VALUES ('REG002', 'S001', 'CS102', 'Algorithms', 'Sem-1-2024', 4, 'completed', false, 'B+') ON CONFLICT DO NOTHING;
+INSERT INTO course_registrations VALUES ('REG003', 'S001', 'CS103', 'Discrete Mathematics', 'Sem-1-2024', 3, 'completed', false, 'A-') ON CONFLICT DO NOTHING;
+-- Sem 2 (Sem-2-2024) — F in CS201 is the backlog
+INSERT INTO course_registrations VALUES ('REG004', 'S001', 'CS201', 'Database Systems', 'Sem-2-2024', 3, 'completed', true, 'F') ON CONFLICT DO NOTHING;
+INSERT INTO course_registrations VALUES ('REG005', 'S001', 'CS202', 'Computer Networks', 'Sem-2-2024', 4, 'completed', false, 'A') ON CONFLICT DO NOTHING;
+INSERT INTO course_registrations VALUES ('REG006', 'S001', 'CS203', 'Object Oriented Programming', 'Sem-2-2024', 4, 'completed', false, 'A') ON CONFLICT DO NOTHING;
+-- Sem 3 (Sem-1-2025) — completed
+INSERT INTO course_registrations VALUES ('REG007', 'S001', 'CS310', 'Software Engineering', 'Sem-1-2025', 3, 'completed', false, 'B+') ON CONFLICT DO NOTHING;
+INSERT INTO course_registrations VALUES ('REG008', 'S001', 'CS311', 'Computer Architecture', 'Sem-1-2025', 4, 'completed', false, 'A-') ON CONFLICT DO NOTHING;
+-- Sem 4 (Sem-2-2025, current — active)
+INSERT INTO course_registrations VALUES ('REG009', 'S001', 'CS301', 'Machine Learning', 'Sem-2-2025', 4, 'active', false, NULL) ON CONFLICT DO NOTHING;
+INSERT INTO course_registrations VALUES ('REG010', 'S001', 'CS302', 'Operating Systems', 'Sem-2-2025', 3, 'active', false, NULL) ON CONFLICT DO NOTHING;
+
+-- S002: Priya Verma — B.Tech CSE, Semester 3, 0 backlogs
+-- Sem 1 (Sem-1-2024)
+INSERT INTO course_registrations VALUES ('REG012', 'S002', 'CS110', 'Introduction to Programming', 'Sem-1-2024', 4, 'completed', false, 'B+') ON CONFLICT DO NOTHING;
+INSERT INTO course_registrations VALUES ('REG013', 'S002', 'MA110', 'Engineering Mathematics I', 'Sem-1-2024', 4, 'completed', false, 'A-') ON CONFLICT DO NOTHING;
+INSERT INTO course_registrations VALUES ('REG014', 'S002', 'PH110', 'Engineering Physics', 'Sem-1-2024', 3, 'completed', false, 'B+') ON CONFLICT DO NOTHING;
+-- Sem 2 (Sem-2-2024)
+INSERT INTO course_registrations VALUES ('REG015', 'S002', 'CS101', 'Data Structures', 'Sem-2-2024', 4, 'completed', false, 'B+') ON CONFLICT DO NOTHING;
+INSERT INTO course_registrations VALUES ('REG016', 'S002', 'CS102', 'Algorithms', 'Sem-2-2024', 4, 'completed', false, 'B') ON CONFLICT DO NOTHING;
+INSERT INTO course_registrations VALUES ('REG017', 'S002', 'CS103', 'Discrete Mathematics', 'Sem-2-2024', 3, 'completed', false, 'A-') ON CONFLICT DO NOTHING;
+-- Sem 3 (Sem-1-2025, current)
+INSERT INTO course_registrations VALUES ('REG018', 'S002', 'CS201', 'Database Systems', 'Sem-1-2025', 3, 'active', false, NULL) ON CONFLICT DO NOTHING;
+INSERT INTO course_registrations VALUES ('REG019', 'S002', 'CS202', 'Computer Networks', 'Sem-1-2025', 4, 'active', false, NULL) ON CONFLICT DO NOTHING;
+
+-- S003: Rohan Gupta — B.Sc Physics, Semester 2, 0 backlogs
+-- Sem 1 (Sem-2-2024)
+INSERT INTO course_registrations VALUES ('REG020', 'S003', 'PH110', 'Engineering Physics', 'Sem-2-2024', 4, 'completed', false, 'A') ON CONFLICT DO NOTHING;
+INSERT INTO course_registrations VALUES ('REG021', 'S003', 'MA110', 'Engineering Mathematics I', 'Sem-2-2024', 4, 'completed', false, 'A-') ON CONFLICT DO NOTHING;
+INSERT INTO course_registrations VALUES ('REG022', 'S003', 'PH111', 'Waves and Optics', 'Sem-2-2024', 3, 'completed', false, 'A') ON CONFLICT DO NOTHING;
+-- Sem 2 (Sem-1-2025, current)
+INSERT INTO course_registrations VALUES ('REG023', 'S003', 'PH101', 'Mechanics', 'Sem-1-2025', 4, 'active', false, NULL) ON CONFLICT DO NOTHING;
+INSERT INTO course_registrations VALUES ('REG024', 'S003', 'PH201', 'Electromagnetism', 'Sem-1-2025', 4, 'active', false, NULL) ON CONFLICT DO NOTHING;
+
+-- S004: Neha Joshi — B.Tech CSE, Semester 2, 0 backlogs
+-- Sem 1 (Sem-2-2024)
+INSERT INTO course_registrations VALUES ('REG025', 'S004', 'CS110', 'Introduction to Programming', 'Sem-2-2024', 4, 'completed', false, 'B+') ON CONFLICT DO NOTHING;
+INSERT INTO course_registrations VALUES ('REG026', 'S004', 'MA110', 'Engineering Mathematics I', 'Sem-2-2024', 4, 'completed', false, 'A-') ON CONFLICT DO NOTHING;
+INSERT INTO course_registrations VALUES ('REG027', 'S004', 'PH110', 'Engineering Physics', 'Sem-2-2024', 3, 'completed', false, 'B') ON CONFLICT DO NOTHING;
+-- Sem 2 (Sem-1-2025, current)
+INSERT INTO course_registrations VALUES ('REG028', 'S004', 'CS101', 'Data Structures', 'Sem-1-2025', 4, 'active', false, NULL) ON CONFLICT DO NOTHING;
+INSERT INTO course_registrations VALUES ('REG029', 'S004', 'CS102', 'Algorithms', 'Sem-1-2025', 4, 'active', false, NULL) ON CONFLICT DO NOTHING;
+INSERT INTO course_registrations VALUES ('REG030', 'S004', 'CS103', 'Discrete Mathematics', 'Sem-1-2025', 3, 'active', false, NULL) ON CONFLICT DO NOTHING;
 
 -- Projects (D3)
 INSERT INTO projects VALUES ('PRJ001', 'AI-based Student Performance Prediction', 'F001', 150000, 'active', 'CSE', 'Using ML to predict student outcomes.', '') ON CONFLICT DO NOTHING;
+INSERT INTO projects VALUES ('PRJ002', 'Quantum Simulation for Condensed Matter Physics', 'F003', 200000, 'active', 'PHY', 'Simulating quantum behaviour of condensed matter systems.', '') ON CONFLICT DO NOTHING;
+INSERT INTO projects VALUES ('PRJ003', 'NLP Tools for Regional Language Processing', 'F001', 100000, 'completed', 'CSE', 'Developing NLP models for Indian regional languages.', '') ON CONFLICT DO NOTHING;
 
 -- Inventory (D4) with lab_incharge_id for lab items
 INSERT INTO inventory VALUES ('INV001', 'Dell Laptop', 'Computer', 10, 'Lab 1', 'good', 'CSE', true, 'F001') ON CONFLICT DO NOTHING;
@@ -220,29 +264,188 @@ INSERT INTO inventory VALUES ('INV003', 'Whiteboard', 'Furniture', 20, 'Classroo
 INSERT INTO inventory VALUES ('INV004', 'Oscilloscope', 'Electronics', 6, 'Physics Lab', 'good', 'PHY', true, 'F003') ON CONFLICT DO NOTHING;
 
 -- Financial Records (D5)
-INSERT INTO financial_records (record_id, record_type, amount, transaction_date, department_id, grant_id) VALUES
-('GR-GRANT001-001', 'grant', 500000, '2025-01-15', 'CSE', 'GRANT001') ON CONFLICT DO NOTHING;
 
-INSERT INTO financial_records (record_id, record_type, amount, transaction_date, department_id, consultancy_id) VALUES
-('CON-CON001-001', 'consultancy', 75000, '2025-02-10', 'CSE', 'CON001') ON CONFLICT DO NOTHING;
+-- Grants (format: GRANT-<DeptID>-<Number>)
+INSERT INTO financial_records (record_id, record_type, amount, transaction_date, department_id, grant_id, description) VALUES
+('GR-GRANT-CSE-001-001', 'grant', 800000, '2025-01-10', 'CSE', 'GRANT-CSE-001',
+'Grant Title: DST Machine Learning Research Infrastructure
+Funding Agency: Department of Science and Technology (DST)
+Principal Investigator: Dr. Ramesh Kumar
+Allocated To: AI & ML Research Lab, CSE
+Objectives: Procurement of high-performance computing infrastructure for ML research
+Grant Period: Jan 2025 to Dec 2026') ON CONFLICT DO NOTHING;
 
-INSERT INTO financial_records (record_id, record_type, amount, transaction_date, department_id, student_id, semester_term, fee_status, fee_updated_timestamp) VALUES
-('FEE-S001-Sem12025-001', 'student-fee', 45000, '2025-01-01', 'CSE', 'S001', 'Sem-1-2025', 'paid', '2025-01-10') ON CONFLICT DO NOTHING;
+INSERT INTO financial_records (record_id, record_type, amount, transaction_date, department_id, grant_id, description) VALUES
+('GR-GRANT-CSE-002-001', 'grant', 350000, '2025-03-05', 'CSE', 'GRANT-CSE-002',
+'Grant Title: UGC Curriculum Development & Modernization
+Funding Agency: University Grants Commission (UGC)
+Principal Investigator: Dr. Priya Sharma
+Allocated To: CSE Department (Academic Division)
+Objectives: Modernizing undergraduate curriculum with AI and cloud computing electives
+Grant Period: Mar 2025 to Feb 2026') ON CONFLICT DO NOTHING;
 
-INSERT INTO financial_records (record_id, record_type, amount, transaction_date, department_id, student_id, semester_term, fee_status, fee_updated_timestamp) VALUES
-('FEE-S002-Sem12025-001', 'student-fee', 45000, '2025-01-01', 'CSE', 'S002', 'Sem-1-2025', 'pending', '2025-01-01') ON CONFLICT DO NOTHING;
+INSERT INTO financial_records (record_id, record_type, amount, transaction_date, department_id, grant_id, description) VALUES
+('GR-GRANT-PHY-001-001', 'grant', 600000, '2025-02-14', 'PHY', 'GRANT-PHY-001',
+'Grant Title: SERB Quantum Optics Laboratory Setup
+Funding Agency: Science and Engineering Research Board (SERB)
+Principal Investigator: Dr. Anil Verma
+Allocated To: Quantum Mechanics Research Group, PHY
+Objectives: Establishing quantum optics lab for experimental research in photonics
+Grant Period: Feb 2025 to Jan 2027') ON CONFLICT DO NOTHING;
+
+INSERT INTO financial_records (record_id, record_type, amount, transaction_date, department_id, grant_id, description) VALUES
+('GR-GRANT-MATH-001-001', 'grant', 200000, '2025-04-01', 'MATH', 'GRANT-MATH-001',
+'Grant Title: NBHM Research Promotion Grant
+Funding Agency: National Board for Higher Mathematics (NBHM)
+Principal Investigator: To Be Assigned
+Allocated To: Mathematics Department
+Objectives: Supporting graduate-level research in applied mathematics and number theory
+Grant Period: Apr 2025 to Mar 2026') ON CONFLICT DO NOTHING;
+
+-- Consultancy (format: CONSULT-<DeptID>-<Number>)
+INSERT INTO financial_records (record_id, record_type, amount, transaction_date, department_id, consultancy_id, description) VALUES
+('CON-CONSULT-CSE-001-001', 'consultancy', 150000, '2025-02-20', 'CSE', 'CONSULT-CSE-001',
+'Project Title: Machine Learning Model Optimization for Customer Analytics
+Client / Industry Partner: Tata Consultancy Services (TCS)
+Lead Consultant: Dr. Ramesh Kumar
+Scope of Work: Development and optimization of ML models for retail customer segmentation
+Contract Period: Jan 2025 to Apr 2025') ON CONFLICT DO NOTHING;
+
+INSERT INTO financial_records (record_id, record_type, amount, transaction_date, department_id, consultancy_id, description) VALUES
+('CON-CONSULT-CSE-002-001', 'consultancy', 85000, '2025-03-15', 'CSE', 'CONSULT-CSE-002',
+'Project Title: Database Performance Tuning and Query Optimization
+Client / Industry Partner: Infosys Ltd.
+Lead Consultant: Dr. Priya Sharma
+Scope of Work: Analyzing and restructuring legacy database architecture for improved performance
+Contract Period: Feb 2025 to Mar 2025') ON CONFLICT DO NOTHING;
+
+INSERT INTO financial_records (record_id, record_type, amount, transaction_date, department_id, consultancy_id, description) VALUES
+('CON-CONSULT-PHY-001-001', 'consultancy', 220000, '2025-01-25', 'PHY', 'CONSULT-PHY-001',
+'Project Title: Material Stress Testing and Thermal Analysis Services
+Client / Industry Partner: Indian Space Research Organisation (ISRO)
+Lead Consultant: Dr. Anil Verma
+Scope of Work: Structural and thermal analysis of satellite component materials under simulated space conditions
+Contract Period: Jan 2025 to Jun 2025') ON CONFLICT DO NOTHING;
+
+-- Student Fees
+INSERT INTO financial_records (record_id, record_type, amount, transaction_date, department_id, student_id, semester_term, fee_status, fee_updated_timestamp, description) VALUES
+('FEE-S001-Sem12025-001', 'student-fee', 45000, '2025-01-01', 'CSE', 'S001', 'Sem-1-2025', 'paid', '2025-01-10',
+'Fee Category: Tuition
+Fee Type: Regular
+Notes: B.Tech CSE Year 4, Sem-1-2025 tuition fee') ON CONFLICT DO NOTHING;
+
+INSERT INTO financial_records (record_id, record_type, amount, transaction_date, department_id, student_id, semester_term, fee_status, fee_updated_timestamp, description) VALUES
+('FEE-S001-Sem22025-001', 'student-fee', 45000, '2025-07-01', 'CSE', 'S001', 'Sem-2-2025', 'pending', '2025-07-01',
+'Fee Category: Tuition
+Fee Type: Regular
+Notes: B.Tech CSE Year 4, Sem-2-2025 tuition fee') ON CONFLICT DO NOTHING;
+
+INSERT INTO financial_records (record_id, record_type, amount, transaction_date, department_id, student_id, semester_term, fee_status, fee_updated_timestamp, description) VALUES
+('FEE-S002-Sem12025-001', 'student-fee', 45000, '2025-01-01', 'CSE', 'S002', 'Sem-1-2025', 'partial', '2025-02-15',
+'Fee Category: Tuition
+Fee Type: Regular
+Notes: B.Tech CSE Year 3, Sem-1-2025 tuition fee — partial payment in progress') ON CONFLICT DO NOTHING;
+
+INSERT INTO financial_records (record_id, record_type, amount, transaction_date, department_id, student_id, semester_term, fee_status, fee_updated_timestamp, description) VALUES
+('FEE-S003-Sem12025-001', 'student-fee', 40000, '2025-01-01', 'PHY', 'S003', 'Sem-1-2025', 'paid', '2025-01-08',
+'Fee Category: Tuition
+Fee Type: Regular
+Notes: B.Sc Physics Year 2, Sem-1-2025 tuition fee') ON CONFLICT DO NOTHING;
+
+INSERT INTO financial_records (record_id, record_type, amount, transaction_date, department_id, student_id, semester_term, fee_status, fee_updated_timestamp, description) VALUES
+('FEE-S004-Sem12025-001', 'student-fee', 45000, '2025-01-01', 'CSE', 'S004', 'Sem-1-2025', 'partial', '2025-02-20',
+'Fee Category: Tuition
+Fee Type: Regular
+Notes: B.Tech CSE Year 2, Sem-1-2025 tuition fee — installment plan approved') ON CONFLICT DO NOTHING;
 
 -- Fee Structures (total fee per student per semester)
 INSERT INTO fee_structures VALUES ('FS-S001-Sem12025', 'S001', 'Sem-1-2025', 'CSE', 45000, '2025-01-01') ON CONFLICT DO NOTHING;
+INSERT INTO fee_structures VALUES ('FS-S001-Sem22025', 'S001', 'Sem-2-2025', 'CSE', 45000, '2025-07-01') ON CONFLICT DO NOTHING;
 INSERT INTO fee_structures VALUES ('FS-S002-Sem12025', 'S002', 'Sem-1-2025', 'CSE', 45000, '2025-01-01') ON CONFLICT DO NOTHING;
 INSERT INTO fee_structures VALUES ('FS-S003-Sem12025', 'S003', 'Sem-1-2025', 'PHY', 40000, '2025-01-01') ON CONFLICT DO NOTHING;
 INSERT INTO fee_structures VALUES ('FS-S004-Sem12025', 'S004', 'Sem-1-2025', 'CSE', 45000, '2025-01-01') ON CONFLICT DO NOTHING;
 
--- Fee Payments (installments — S001 paid in full, S002 partially paid, S004 partially paid)
-INSERT INTO fee_payments VALUES ('FP-S001-001', 'S001', 'Sem-1-2025', 45000, '2025-01-10', 'online', 'Full payment') ON CONFLICT DO NOTHING;
+-- Fee Payments
+INSERT INTO fee_payments VALUES ('FP-S001-001', 'S001', 'Sem-1-2025', 45000, '2025-01-10', 'online', 'Full payment — cleared in single transaction') ON CONFLICT DO NOTHING;
 INSERT INTO fee_payments VALUES ('FP-S002-001', 'S002', 'Sem-1-2025', 20000, '2025-01-15', 'online', 'First installment') ON CONFLICT DO NOTHING;
 INSERT INTO fee_payments VALUES ('FP-S002-002', 'S002', 'Sem-1-2025', 10000, '2025-02-15', 'upi', 'Second installment') ON CONFLICT DO NOTHING;
+INSERT INTO fee_payments VALUES ('FP-S003-001', 'S003', 'Sem-1-2025', 40000, '2025-01-08', 'online', 'Full payment') ON CONFLICT DO NOTHING;
 INSERT INTO fee_payments VALUES ('FP-S004-001', 'S004', 'Sem-1-2025', 15000, '2025-01-20', 'cheque', 'First installment') ON CONFLICT DO NOTHING;
+INSERT INTO fee_payments VALUES ('FP-S004-002', 'S004', 'Sem-1-2025', 10000, '2025-02-20', 'upi', 'Second installment') ON CONFLICT DO NOTHING;
+
+-- Project Finance
+-- PRJ001: AI-based Student Performance Prediction (budget ₹1,50,000)
+INSERT INTO financial_records (record_id, record_type, amount, transaction_date, department_id, project_id, description) VALUES
+('PRO-PRJ001-001', 'project-budget', 150000, '2025-01-05', 'CSE', 'PRJ001',
+'Expense Category: Budget Allocation
+Authorized By: Department Head, CSE
+Vendor / Payee: N/A
+Purpose: Initial project budget allocation for AI-based student performance prediction system') ON CONFLICT DO NOTHING;
+
+INSERT INTO financial_records (record_id, record_type, amount, transaction_date, department_id, project_id, description) VALUES
+('EXP-PRJ001-001', 'expense', 72000, '2025-02-10', 'CSE', 'PRJ001',
+'Expense Category: Equipment
+Authorized By: Dr. Ramesh Kumar
+Vendor / Payee: Dell India Pvt. Ltd.
+Purpose: GPU workstation procurement for ML model training') ON CONFLICT DO NOTHING;
+
+INSERT INTO financial_records (record_id, record_type, amount, transaction_date, department_id, project_id, description) VALUES
+('EXP-PRJ001-002', 'expense', 18500, '2025-03-01', 'CSE', 'PRJ001',
+'Expense Category: Software
+Authorized By: Dr. Ramesh Kumar
+Vendor / Payee: MathWorks India (MATLAB)
+Purpose: Annual academic license for MATLAB and Simulink toolboxes') ON CONFLICT DO NOTHING;
+
+INSERT INTO financial_records (record_id, record_type, amount, transaction_date, department_id, project_id, description) VALUES
+('EXP-PRJ001-003', 'expense', 21000, '2025-04-05', 'CSE', 'PRJ001',
+'Expense Category: Travel
+Authorized By: Dr. Ramesh Kumar
+Vendor / Payee: ICML 2025 Conference
+Purpose: Conference registration and travel expenses for presenting research paper') ON CONFLICT DO NOTHING;
+
+-- PRJ002: Quantum Simulation for Condensed Matter Physics (budget ₹2,00,000)
+INSERT INTO financial_records (record_id, record_type, amount, transaction_date, department_id, project_id, description) VALUES
+('PRO-PRJ002-001', 'project-budget', 200000, '2025-01-20', 'PHY', 'PRJ002',
+'Expense Category: Budget Allocation
+Authorized By: Department Head, PHY
+Vendor / Payee: N/A
+Purpose: Initial budget allocation for quantum simulation research project') ON CONFLICT DO NOTHING;
+
+INSERT INTO financial_records (record_id, record_type, amount, transaction_date, department_id, project_id, description) VALUES
+('EXP-PRJ002-001', 'expense', 95000, '2025-02-25', 'PHY', 'PRJ002',
+'Expense Category: Equipment
+Authorized By: Dr. Anil Verma
+Vendor / Payee: Tektronix India
+Purpose: Quantum optics measurement instruments and precision oscilloscopes') ON CONFLICT DO NOTHING;
+
+INSERT INTO financial_records (record_id, record_type, amount, transaction_date, department_id, project_id, description) VALUES
+('EXP-PRJ002-002', 'expense', 32000, '2025-03-20', 'PHY', 'PRJ002',
+'Expense Category: Software
+Authorized By: Dr. Anil Verma
+Vendor / Payee: Wolfram Research
+Purpose: Mathematica and Wolfram Alpha Pro licenses for simulation work') ON CONFLICT DO NOTHING;
+
+-- PRJ003: NLP Tools for Regional Language Processing (budget ₹1,00,000, completed)
+INSERT INTO financial_records (record_id, record_type, amount, transaction_date, department_id, project_id, description) VALUES
+('PRO-PRJ003-001', 'project-budget', 100000, '2024-06-01', 'CSE', 'PRJ003',
+'Expense Category: Budget Allocation
+Authorized By: Department Head, CSE
+Vendor / Payee: N/A
+Purpose: Initial budget allocation for NLP regional language tools project') ON CONFLICT DO NOTHING;
+
+INSERT INTO financial_records (record_id, record_type, amount, transaction_date, department_id, project_id, description) VALUES
+('EXP-PRJ003-001', 'expense', 58000, '2024-08-15', 'CSE', 'PRJ003',
+'Expense Category: Personnel
+Authorized By: Dr. Ramesh Kumar
+Vendor / Payee: Research Assistants (2 positions)
+Purpose: Stipend for two research assistants for 6-month project duration') ON CONFLICT DO NOTHING;
+
+INSERT INTO financial_records (record_id, record_type, amount, transaction_date, department_id, project_id, description) VALUES
+('EXP-PRJ003-002', 'expense', 28000, '2024-10-01', 'CSE', 'PRJ003',
+'Expense Category: Equipment
+Authorized By: Dr. Ramesh Kumar
+Vendor / Payee: Amazon Web Services India
+Purpose: Cloud computing credits for model training and API hosting') ON CONFLICT DO NOTHING;
 
 -- Department Fund Sources
 INSERT INTO department_fund_sources VALUES ('DFS-CSE-001', 'CSE', 'Government Grant', 500000, '2025-01-15', 'Annual government funding for CSE dept') ON CONFLICT DO NOTHING;

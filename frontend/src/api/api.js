@@ -33,6 +33,7 @@ export const addFaculty = (body) => api.post('/secretary/faculty', body);
 export const updateFaculty = (facultyId, body) => api.put(`/secretary/faculty/${facultyId}`, body);
 export const deactivateFaculty = (facultyId) => api.delete(`/secretary/faculty/${facultyId}`);
 export const forceDeactivateFaculty = (facultyId) => api.delete(`/secretary/faculty/${facultyId}/force`);
+export const deleteFacultyPermanent = (facultyId) => api.delete(`/secretary/faculty/${facultyId}/permanent`);
 
 export const getProjects = (departmentId) => api.get('/secretary/projects', { params: { departmentId } });
 export const addProject = (body) => api.post('/secretary/projects', body);

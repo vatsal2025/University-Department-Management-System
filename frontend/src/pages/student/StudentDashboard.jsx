@@ -3,11 +3,12 @@ import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { getStudent, calculateGpa } from '../../api/api';
 import CourseRegistration from './CourseRegistration';
+import MyCourses from './MyCourses';
 import GPAView from './GPAView';
 import BacklogTracking from './BacklogTracking';
 import FeeStatus from './FeeStatus';
 
-const TABS = ['Dashboard', 'Course Registration', 'GPA & Grades', 'Program & Backlogs', 'Fee Status'];
+const TABS = ['Dashboard', 'Course Registration', 'My Courses', 'GPA & Grades', 'Program & Backlogs', 'Fee Status'];
 
 export default function StudentDashboard() {
   const { user, logoutUser } = useAuth();
@@ -62,9 +63,10 @@ export default function StudentDashboard() {
       <div className="content">
         {activeTab === 0 && <Dashboard student={student} />}
         {activeTab === 1 && <CourseRegistration studentId={user.student_id} departmentId={student?.department_id} />}
-        {activeTab === 2 && <GPAView studentId={user.student_id} student={student} />}
-        {activeTab === 3 && <BacklogTracking studentId={user.student_id} />}
-        {activeTab === 4 && <FeeStatus studentId={user.student_id} />}
+        {activeTab === 2 && <MyCourses studentId={user.student_id} />}
+        {activeTab === 3 && <GPAView studentId={user.student_id} student={student} />}
+        {activeTab === 4 && <BacklogTracking studentId={user.student_id} />}
+        {activeTab === 5 && <FeeStatus studentId={user.student_id} />}
       </div>
     </div>
   );

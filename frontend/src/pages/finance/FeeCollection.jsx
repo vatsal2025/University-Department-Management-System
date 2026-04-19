@@ -11,7 +11,7 @@ export default function FeeCollection() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [showNewFee, setShowNewFee] = useState(false);
-  const [newFee, setNewFee] = useState({ semester_term: 'Sem-1-2025', amount: '', department_id: '' });
+  const [newFee, setNewFee] = useState({ semester_term: 'Sem-1-2025', amount: '', department_id: '', description: '' });
 
   const searchStudent = async (e) => {
     e.preventDefault();
@@ -43,6 +43,7 @@ export default function FeeCollection() {
       await createFeeRecord({ ...newFee, student_id: studentData.student_id, amount: parseFloat(newFee.amount) });
       setSuccess('Fee record created.');
       setShowNewFee(false);
+      setNewFee({ semester_term: 'Sem-1-2025', amount: '', department_id: '', description: '' });
       const res = await getStudentFees(studentData.student_id);
       setStudentData(res.data);
     } catch (e) {
@@ -95,6 +96,20 @@ export default function FeeCollection() {
                     <input value={newFee.department_id} onChange={e => setNewFee(p => ({ ...p, department_id: e.target.value }))} placeholder="e.g. CSE" />
                   </div>
                 </div>
+                <div className="form-group">
+                  <label>Description</label>
+                  <textarea
+                    value={newFee.description}
+                    onChange={e => setNewFee(p => ({ ...p, description: e.target.value }))}
+                    rows={4}
+                    placeholder={
+                      'Fee Category: [Tuition / Hostel / Lab / Library / Examination]\n' +
+                      'Fee Type: [Regular / Late / Supplementary]\n' +
+                      'Notes: [any additional information or special instructions]'
+                    }
+                    style={{ resize: 'vertical' }}
+                  />
+                </div>
                 <button type="submit" className="btn btn-primary btn-sm">Create Record</button>
               </form>
             )}
@@ -104,7 +119,7 @@ export default function FeeCollection() {
             ) : (
               <div className="table-wrapper">
                 <table>
-                  <thead><tr><th>Semester</th><th>Amount (₹)</th><th>Status</th><th>Last Updated</th><th>Actions</th></tr></thead>
+                  <thead><tr><th>Semester</th><th>Amount (₹)</th><th>Status</th><th>Last Updated</th><th>Description</th><th>Actions</th></tr></thead>
                   <tbody>
                     {studentData.fees.map(f => (
                       <tr key={f.record_id}>
@@ -112,6 +127,7 @@ export default function FeeCollection() {
                         <td>₹{Number(f.amount).toLocaleString()}</td>
                         <td><span className={`badge ${STATUS_BADGE[f.fee_status] || 'badge-gray'}`}>{f.fee_status}</span></td>
                         <td>{f.fee_updated_timestamp ? new Date(f.fee_updated_timestamp).toLocaleDateString() : '—'}</td>
+                        <td style={{ whiteSpace: 'pre-line', maxWidth: 240 }}>{f.description || '—'}</td>
                         <td>
                           <div className="btn-group">
                             {f.fee_status !== 'paid' && <button className="btn btn-success btn-sm" onClick={() => handleFeeUpdate(f.semester_term, 'paid')}>Mark Paid</button>}

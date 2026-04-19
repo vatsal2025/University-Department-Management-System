@@ -28,12 +28,19 @@ export default function GPAView({ studentId, student }) {
 
   if (loading) return <div className="loading"><div className="spinner"></div></div>;
 
+  const parseTerm = (t) => { const p = t.split('-'); return { year: parseInt(p[2]), sem: parseInt(p[1]) }; };
+  const sortTerms = (keys) => keys.sort((a, b) => {
+    const pa = parseTerm(a), pb = parseTerm(b);
+    return pb.year !== pa.year ? pb.year - pa.year : pb.sem - pa.sem;
+  });
+
   const completedRegs = registrations.filter(r => r.registration_status === 'completed');
   const semesterGroups = completedRegs.reduce((acc, r) => {
     acc[r.semester_term] = acc[r.semester_term] || [];
     acc[r.semester_term].push(r);
     return acc;
   }, {});
+  const sortedSemesterKeys = sortTerms(Object.keys(semesterGroups));
 
   return (
     <div>
@@ -63,8 +70,8 @@ export default function GPAView({ studentId, student }) {
             <table>
               <thead><tr><th>Semester</th><th>SGPA</th></tr></thead>
               <tbody>
-                {Object.entries(gpaData.semester_sgpa).map(([sem, sgpa]) => (
-                  <tr key={sem}><td>{sem}</td><td>{Number(sgpa).toFixed(2)}</td></tr>
+                {sortTerms(Object.keys(gpaData.semester_sgpa)).map(sem => (
+                  <tr key={sem}><td>{sem}</td><td>{Number(gpaData.semester_sgpa[sem]).toFixed(2)}</td></tr>
                 ))}
               </tbody>
             </table>
@@ -72,7 +79,7 @@ export default function GPAView({ studentId, student }) {
         </div>
       )}
 
-      {Object.keys(semesterGroups).map(sem => (
+      {sortedSemesterKeys.map(sem => (
         <div className="card" key={sem}>
           <div className="card-title">
             {sem}

@@ -26,6 +26,17 @@ public class FinanceService {
 
         if (grantId == null || grantId.isBlank()) throw new RuntimeException("Grant ID is required.");
 
+        // Validate format: GRANT-<DeptName>-<Numbers>
+        if (!grantId.matches("^GRANT-[A-Za-z0-9]+-\\d+$")) {
+            throw new RuntimeException("Grant ID must follow format: GRANT-<DepartmentName>-<Number> (e.g. GRANT-CSE-001).");
+        }
+
+        // Validate department segment matches the selected department_id
+        String grantDeptSegment = grantId.split("-")[1];
+        if (!grantDeptSegment.equalsIgnoreCase(departmentId)) {
+            throw new RuntimeException("Grant ID department segment '" + grantDeptSegment + "' does not match selected department '" + departmentId + "'.");
+        }
+
         // Check duplicate grant_id
         Map<String, Object> existing = supabase.getSingle("financial_records",
                 "grant_id=eq." + grantId + "&record_type=eq.grant");
@@ -42,6 +53,7 @@ public class FinanceService {
         record.put("transaction_date", body.getOrDefault("transaction_date", Instant.now().toString()));
         record.put("department_id", departmentId);
         record.put("grant_id", grantId);
+        record.put("description", body.getOrDefault("description", ""));
 
         List<Map<String, Object>> result = supabase.post("financial_records", record);
         return result.isEmpty() ? record : result.get(0);
@@ -57,7 +69,20 @@ public class FinanceService {
 
     public Map<String, Object> recordConsultancy(Map<String, Object> body) throws Exception {
         String consultancyId = (String) body.get("consultancy_id");
+        String departmentId = (String) body.get("department_id");
+
         if (consultancyId == null || consultancyId.isBlank()) throw new RuntimeException("Consultancy ID is required.");
+
+        // Validate format: CONSULT-<DeptName>-<Numbers>
+        if (!consultancyId.matches("^CONSULT-[A-Za-z0-9]+-\\d+$")) {
+            throw new RuntimeException("Consultancy ID must follow format: CONSULT-<DepartmentName>-<Number> (e.g. CONSULT-CSE-001).");
+        }
+
+        // Validate department segment matches the selected department_id
+        String consultDeptSegment = consultancyId.split("-")[1];
+        if (!consultDeptSegment.equalsIgnoreCase(departmentId)) {
+            throw new RuntimeException("Consultancy ID department segment '" + consultDeptSegment + "' does not match selected department '" + departmentId + "'.");
+        }
 
         Map<String, Object> existing = supabase.getSingle("financial_records",
                 "consultancy_id=eq." + consultancyId + "&record_type=eq.consultancy");
@@ -68,12 +93,16 @@ public class FinanceService {
             throw new RuntimeException("Amount must be a positive value.");
         }
 
+        // Validate department exists
+        Map<String, Object> dept = supabase.getSingle("departments", "department_id=eq." + departmentId);
+        if (dept == null) throw new RuntimeException("Department not found.");
+
         Map<String, Object> record = new HashMap<>();
         record.put("record_id", "CON-" + consultancyId + "-" + Instant.now().toEpochMilli());
         record.put("record_type", "consultancy");
         record.put("amount", body.get("amount"));
         record.put("transaction_date", body.getOrDefault("transaction_date", Instant.now().toString()));
-        record.put("department_id", body.get("department_id"));
+        record.put("department_id", departmentId);
         record.put("consultancy_id", consultancyId);
         record.put("description", body.getOrDefault("description", ""));
 
@@ -155,6 +184,7 @@ public class FinanceService {
         record.put("fee_status", body.getOrDefault("fee_status", "pending"));
         record.put("fee_updated_timestamp", Instant.now().toString());
         record.put("department_id", body.get("department_id"));
+        record.put("description", body.getOrDefault("description", ""));
 
         List<Map<String, Object>> result = supabase.post("financial_records", record);
 

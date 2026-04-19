@@ -103,7 +103,18 @@ export default function ProjectFinance() {
             </div>
             <div className="form-group">
               <label>Description</label>
-              <input value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} />
+              <textarea
+                value={form.description}
+                onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
+                rows={4}
+                placeholder={
+                  'Expense Category: [Equipment / Travel / Personnel / Software / Other]\n' +
+                  'Authorized By: [approving authority name]\n' +
+                  'Vendor / Payee: [supplier or recipient name]\n' +
+                  'Purpose: [brief description of what the funds are used for]'
+                }
+                style={{ resize: 'vertical' }}
+              />
             </div>
             <button type="submit" className="btn btn-primary">Record Entry</button>
           </form>

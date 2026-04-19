@@ -68,6 +68,18 @@ public class SecretaryController {
         }
     }
 
+    @DeleteMapping("/faculty/{facultyId}/permanent")
+    public ResponseEntity<?> deleteFaculty(@PathVariable String facultyId) {
+        try {
+            secretaryService.deleteFaculty(facultyId);
+            return ResponseEntity.ok(Map.of("message", "Faculty record permanently deleted."));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+        }
+    }
+
     // UC-07: Project Management
     @GetMapping("/projects")
     public ResponseEntity<?> getProjects(@RequestParam String departmentId) {
