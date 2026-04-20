@@ -61,7 +61,6 @@ class EnrollmentServiceTest {
                     and(contains("S001"), and(contains("CS101"), contains("completed"))))).thenReturn(null);
             when(supabase.getSingle(eq("course_registrations"),
                     and(contains("S001"), and(contains("CS101"), contains("active"))))).thenReturn(null);
-            when(supabase.post(eq("course_registrations"), any())).thenReturn(List.of());
 
             Map<String, Object> result = studentService.registerCourses("S001", "Sem-1-2025", List.of("CS101"));
 

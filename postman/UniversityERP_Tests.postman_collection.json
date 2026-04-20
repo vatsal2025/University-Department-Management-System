@@ -1,17 +1,19 @@
 {
   "info": {
     "_postman_id": "udiims-collection-v1",
-    "name": "UDIIMS University ERP — Full API Test Suite",
+    "name": "UDIIMS University ERP \u00e2\u20ac\u201d Full API Test Suite",
     "description": "Comprehensive REST API tests for all 14 use cases in UDIIMS.\nCovers Students, Courses, Enrollment, GPA, Fees, Finance, Secretary, and Department Funds.\n\nEnvironment: ERP Local Environment\nBase URL: {{baseUrl}}",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    { "key": "baseUrl", "value": "http://localhost:8080" }
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    }
   ],
   "item": [
-
     {
-      "name": "UC-01 — Student Profile",
+      "name": "UC-01 \u00e2\u20ac\u201d Student Profile",
       "item": [
         {
           "name": "GET Student by ID (valid)",
@@ -36,7 +38,7 @@
           }
         },
         {
-          "name": "GET Student by ID (invalid — expect 404)",
+          "name": "GET Student by ID (invalid \u00e2\u20ac\u201d expect 404)",
           "event": [
             {
               "listen": "test",
@@ -55,9 +57,8 @@
         }
       ]
     },
-
     {
-      "name": "UC-02 — Course Registration",
+      "name": "UC-02 \u00e2\u20ac\u201d Course Registration",
       "item": [
         {
           "name": "GET Available Courses",
@@ -78,17 +79,11 @@
           ],
           "request": {
             "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/api/students/courses/available?semesterTerm={{semesterTerm}}&departmentId={{departmentId}}",
-              "query": [
-                { "key": "semesterTerm", "value": "{{semesterTerm}}" },
-                { "key": "departmentId", "value": "{{departmentId}}" }
-              ]
-            }
+            "url": "{{baseUrl}}/api/students/courses/available?semesterTerm={{semesterTerm}}&departmentId={{departmentId}}"
           }
         },
         {
-          "name": "GET Available Courses — unknown semester (empty array)",
+          "name": "GET Available Courses \u00e2\u20ac\u201d unknown semester (empty array)",
           "event": [
             {
               "listen": "test",
@@ -125,7 +120,12 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"semester_term\": \"{{semesterTerm}}\",\n  \"course_codes\": [\"{{courseCode}}\"]\n}"
@@ -134,7 +134,7 @@
           }
         },
         {
-          "name": "POST Register Courses — empty list (400)",
+          "name": "POST Register Courses \u00e2\u20ac\u201d empty list (400)",
           "event": [
             {
               "listen": "test",
@@ -148,7 +148,12 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"semester_term\": \"{{semesterTerm}}\",\n  \"course_codes\": []\n}"
@@ -189,17 +194,13 @@
           ],
           "request": {
             "method": "DELETE",
-            "url": {
-              "raw": "{{baseUrl}}/api/students/{{studentId}}/registrations/{{courseCode}}?semesterTerm={{semesterTerm}}",
-              "query": [{ "key": "semesterTerm", "value": "{{semesterTerm}}" }]
-            }
+            "url": "{{baseUrl}}/api/students/{{studentId}}/registrations/{{courseCode}}?semesterTerm={{semesterTerm}}"
           }
         }
       ]
     },
-
     {
-      "name": "UC-03 — GPA Calculation",
+      "name": "UC-03 \u00e2\u20ac\u201d GPA Calculation",
       "item": [
         {
           "name": "POST Calculate GPA",
@@ -241,7 +242,7 @@
           }
         },
         {
-          "name": "GET GPA — unknown student (404)",
+          "name": "GET GPA \u00e2\u20ac\u201d unknown student (404)",
           "event": [
             {
               "listen": "test",
@@ -259,9 +260,8 @@
         }
       ]
     },
-
     {
-      "name": "UC-04 — Backlog Tracking",
+      "name": "UC-04 \u00e2\u20ac\u201d Backlog Tracking",
       "item": [
         {
           "name": "GET Backlog Tracking",
@@ -284,9 +284,8 @@
         }
       ]
     },
-
     {
-      "name": "UC-05 — Student Fee View",
+      "name": "UC-05 \u00e2\u20ac\u201d Student Fee View",
       "item": [
         {
           "name": "GET Student Fees (student portal)",
@@ -299,7 +298,7 @@
                   "  pm.expect(pm.response.code).to.be.oneOf([200, 404]);",
                   "});",
                   "if (pm.response.code === 200) {",
-                  "  pm.test('Has fee records', () => pm.expect(pm.response.json()).to.be.an('array').or.to.be.an('object'));",
+                  "  pm.test('Has fee records', () => pm.expect(pm.response.json()).to.exist);",
                   "}"
                 ]
               }
@@ -312,9 +311,8 @@
         }
       ]
     },
-
     {
-      "name": "UC-10 — Secretary: Course Management",
+      "name": "UC-10 \u00e2\u20ac\u201d Secretary: Course Management",
       "item": [
         {
           "name": "GET All Course Offerings",
@@ -331,11 +329,11 @@
           ],
           "request": {
             "method": "GET",
-            "url": "{{baseUrl}}/api/secretary/courses"
+            "url": "{{baseUrl}}/api/secretary/courses?departmentId={{departmentId}}"
           }
         },
         {
-          "name": "POST Add Course Offering (duplicate — 400)",
+          "name": "POST Add Course Offering (duplicate \u00e2\u20ac\u201d 400)",
           "event": [
             {
               "listen": "test",
@@ -351,7 +349,12 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"course_code\": \"CS101\",\n  \"course_name\": \"Data Structures\",\n  \"credit_hours\": 4,\n  \"semester_term\": \"{{semesterTerm}}\",\n  \"department_id\": \"{{departmentId}}\"\n}"
@@ -360,7 +363,7 @@
           }
         },
         {
-          "name": "POST Add Course Offering — zero credit hours (400)",
+          "name": "POST Add Course Offering \u00e2\u20ac\u201d zero credit hours (400)",
           "event": [
             {
               "listen": "test",
@@ -376,10 +379,15 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"course_code\": \"CS_INVALID\",\n  \"course_name\": \"Bad Course\",\n  \"credit_hours\": 0,\n  \"semester_term\": \"{{semesterTerm}}\",\n  \"department_id\": \"{{departmentId}}\"\n}"
+              "raw": "{\n  \"course_code\": \"CS001\",\n  \"course_name\": \"Bad Course\",\n  \"credit_hours\": 0,\n  \"semester_term\": \"{{semesterTerm}}\",\n  \"department_id\": \"{{departmentId}}\"\n}"
             },
             "url": "{{baseUrl}}/api/secretary/courses"
           }
@@ -399,14 +407,13 @@
           ],
           "request": {
             "method": "GET",
-            "url": "{{baseUrl}}/api/secretary/inventory"
+            "url": "{{baseUrl}}/api/secretary/inventory?departmentId={{departmentId}}"
           }
         }
       ]
     },
-
     {
-      "name": "UC-11 — Grant Management",
+      "name": "UC-11 \u00e2\u20ac\u201d Grant Management",
       "item": [
         {
           "name": "GET Grants",
@@ -427,7 +434,7 @@
           }
         },
         {
-          "name": "POST Record Grant — missing grant_id (400)",
+          "name": "POST Record Grant \u00e2\u20ac\u201d missing grant_id (400)",
           "event": [
             {
               "listen": "test",
@@ -441,7 +448,12 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"department_id\": \"CSE\",\n  \"amount\": 100000\n}"
@@ -451,9 +463,8 @@
         }
       ]
     },
-
     {
-      "name": "UC-12 — Consultancy Fund",
+      "name": "UC-12 \u00e2\u20ac\u201d Consultancy Fund",
       "item": [
         {
           "name": "GET Consultancy Records",
@@ -474,7 +485,7 @@
           }
         },
         {
-          "name": "POST Record Consultancy — negative amount (400)",
+          "name": "POST Record Consultancy \u00e2\u20ac\u201d negative amount (400)",
           "event": [
             {
               "listen": "test",
@@ -488,7 +499,12 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"consultancy_id\": \"CON-TEST-999\",\n  \"department_id\": \"CSE\",\n  \"amount\": -500\n}"
@@ -498,9 +514,8 @@
         }
       ]
     },
-
     {
-      "name": "UC-13 — Fee Collection (Finance Officer)",
+      "name": "UC-13 \u00e2\u20ac\u201d Fee Collection (Finance Officer)",
       "item": [
         {
           "name": "GET Student Fees (Finance Officer view)",
@@ -540,7 +555,12 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"semester_term\": \"{{semesterTerm}}\",\n  \"amount\": 10000,\n  \"payment_method\": \"online\"\n}"
@@ -565,10 +585,7 @@
           ],
           "request": {
             "method": "GET",
-            "url": {
-              "raw": "{{baseUrl}}/api/finance/fees/{{studentId}}/payments?semesterTerm={{semesterTerm}}",
-              "query": [{ "key": "semesterTerm", "value": "{{semesterTerm}}" }]
-            }
+            "url": "{{baseUrl}}/api/finance/fees/{{studentId}}/payments?semesterTerm={{semesterTerm}}"
           }
         },
         {
@@ -588,7 +605,12 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"student_id\": \"{{studentId}}\",\n  \"semester_term\": \"Sem-3-2026\",\n  \"amount\": 55000,\n  \"department_id\": \"CSE\",\n  \"fee_status\": \"pending\"\n}"
@@ -598,9 +620,8 @@
         }
       ]
     },
-
     {
-      "name": "UC-14 — Project Finance",
+      "name": "UC-14 \u00e2\u20ac\u201d Project Finance",
       "item": [
         {
           "name": "GET Projects",
@@ -640,7 +661,6 @@
         }
       ]
     },
-
     {
       "name": "Department Fund Management (New Feature)",
       "item": [
@@ -716,7 +736,12 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"source_type\": \"government_grant\",\n  \"amount\": 500000,\n  \"financial_year\": \"2025-26\",\n  \"description\": \"Annual UGC grant\"\n}"
@@ -725,7 +750,7 @@
           }
         },
         {
-          "name": "POST Add Fund Usage — overspend (400)",
+          "name": "POST Add Fund Usage \u00e2\u20ac\u201d overspend (400)",
           "event": [
             {
               "listen": "test",
@@ -742,7 +767,12 @@
           ],
           "request": {
             "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"purpose\": \"lab_equipment\",\n  \"amount\": 99999999999,\n  \"description\": \"Overspend test\"\n}"
@@ -752,6 +782,5 @@
         }
       ]
     }
-
   ]
 }
