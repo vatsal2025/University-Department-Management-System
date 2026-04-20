@@ -4,6 +4,12 @@ import { getIdValidationMessage } from '../../utils/idValidation';
 
 const EMPTY = { project_id: '', project_title: '', faculty_id: '', project_budget: '', project_status: 'active', abstract: '', publication_link: '' };
 
+function nextProjectId(projects) {
+  const nums = projects.map(p => parseInt((p.project_id || '').replace(/\D/g, ''))).filter(n => !isNaN(n));
+  const next = nums.length > 0 ? Math.max(...nums) + 1 : 1;
+  return 'PRJ' + String(next).padStart(3, '0');
+}
+
 export default function ProjectManagement({ departmentId }) {
   const [projects, setProjects] = useState([]);
   const [faculty, setFaculty] = useState([]);
@@ -50,7 +56,7 @@ export default function ProjectManagement({ departmentId }) {
     <div>
       <div className="section-header">
         <h3>Project Management — UC-07</h3>
-        <button className="btn btn-primary" onClick={() => { setForm({ ...EMPTY }); setError(''); setModal('add'); }}>+ Add Project</button>
+        <button className="btn btn-primary" onClick={() => { setForm({ ...EMPTY, project_id: nextProjectId(projects) }); setError(''); setModal('add'); }}>+ Add Project</button>
       </div>
       {error && <div className="alert alert-error">{error}</div>}
       {success && <div className="alert alert-success">{success}</div>}

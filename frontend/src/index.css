@@ -105,3 +105,12 @@ textarea { min-height: 80px; resize: vertical; }
 .section-header h3 { font-size: 1rem; font-weight: 600; color: #1e3a5f; }
 .warning-banner { background: #fef3c7; border: 1px solid #f59e0b; color: #92400e; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-weight: 500; }
 .read-only-note { background: #f0f4ff; border: 1px solid #bfdbfe; color: #1e40af; padding: 10px 14px; border-radius: 7px; font-size: 0.85rem; margin-bottom: 16px; }
+
+@media print {
+  @page { margin: 10mm; }
+  .sidebar, .topbar, nav, .btn, button, .role-tabs, .stats-row .stat-card:last-child { display: none !important; }
+  body { background: white; }
+  .app-layout, .main-content, .content-area { display: block !important; padding: 0 !important; margin: 0 !important; }
+  .card { box-shadow: none !important; border: 1px solid #e2e8f0; break-inside: avoid; }
+  .no-print { display: none !important; }
+}

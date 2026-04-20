@@ -97,7 +97,7 @@ export default function GPAView({ studentId, student }) {
         </div>
       ))}
 
-      <div style={{ textAlign: 'right', marginTop: 16 }}>
+      <div className="no-print" style={{ textAlign: 'right', marginTop: 16 }}>
         <button className="btn btn-secondary" onClick={handlePrint}>Download / Print Grade Card</button>
       </div>
     </div>

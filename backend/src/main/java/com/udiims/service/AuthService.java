@@ -2,6 +2,7 @@ package com.udiims.service;
 
 import com.udiims.exception.InvalidCredentialsException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -13,13 +14,23 @@ public class AuthService {
     @Autowired
     private SupabaseService supabase;
 
+    private static final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+    private boolean passwordMatches(String raw, String stored) {
+        if (stored == null) return false;
+        if (stored.startsWith("$2a$") || stored.startsWith("$2b$")) {
+            return passwordEncoder.matches(raw, stored);
+        }
+        return stored.equals(raw);
+    }
+
     public Map<String, Object> loginStudent(String studentId, String password) throws Exception {
         Map<String, Object> studentRecord = supabase.getSingle("students",
                 "student_id=eq." + studentId + "&select=student_id,student_name,program,semester,sgpa,cgpa,backlog_count,department_id,password");
         if (studentRecord == null) {
             throw new InvalidCredentialsException("Invalid ID");
         }
-        if (!String.valueOf(studentRecord.get("password")).equals(password)) {
+        if (!passwordMatches(password, String.valueOf(studentRecord.get("password")))) {
             throw new InvalidCredentialsException("Invalid password");
         }
 
@@ -41,7 +52,7 @@ public class AuthService {
         if (secretary == null) {
             throw new InvalidCredentialsException("Invalid ID");
         }
-        if (!String.valueOf(secretary.get("password")).equals(password)) {
+        if (!passwordMatches(password, String.valueOf(secretary.get("password")))) {
             throw new InvalidCredentialsException("Invalid password");
         }
 
@@ -57,7 +68,7 @@ public class AuthService {
         if (officer == null) {
             throw new InvalidCredentialsException("Invalid ID");
         }
-        if (!String.valueOf(officer.get("password")).equals(password)) {
+        if (!passwordMatches(password, String.valueOf(officer.get("password")))) {
             throw new InvalidCredentialsException("Invalid password");
         }
 

@@ -5,6 +5,12 @@ import { getIdValidationMessage } from '../../utils/idValidation';
 const CONDITIONS = ['new', 'good', 'fair', 'poor', 'disposed'];
 const EMPTY = { item_id: '', item_name: '', category: '', quantity: 1, location: '', condition: 'good', is_lab_item: false };
 
+function nextItemId(items) {
+  const nums = items.map(i => parseInt((i.item_id || '').replace(/\D/g, ''))).filter(n => !isNaN(n));
+  const next = nums.length > 0 ? Math.max(...nums) + 1 : 1;
+  return 'INV' + String(next).padStart(3, '0');
+}
+
 export default function InventoryManagement({ departmentId, isTechnical }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -52,7 +58,7 @@ export default function InventoryManagement({ departmentId, isTechnical }) {
     <div>
       <div className="section-header">
         <h3>Inventory Management — UC-08</h3>
-        <button className="btn btn-primary" onClick={() => { setForm({ ...EMPTY }); setError(''); setModal('add'); }}>+ Add Item</button>
+        <button className="btn btn-primary" onClick={() => { setForm({ ...EMPTY, item_id: nextItemId(items) }); setError(''); setModal('add'); }}>+ Add Item</button>
       </div>
       {error && <div className="alert alert-error">{error}</div>}
       {success && <div className="alert alert-success">{success}</div>}

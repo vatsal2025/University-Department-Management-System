@@ -42,6 +42,12 @@
             <!-- includes JUnit 5, Mockito, AssertJ, MockMvc -->
         </dependency>
 
+        <!-- BCrypt password hashing -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-crypto</artifactId>
+        </dependency>
+
         <!-- Selenium WebDriver -->
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
