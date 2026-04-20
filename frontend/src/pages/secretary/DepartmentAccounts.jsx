@@ -47,17 +47,16 @@ export default function DepartmentAccounts({ departmentId }) {
         <div className="card-title">Financial Records — UC-09</div>
         <div className="table-wrapper">
           <table>
-            <thead><tr><th>Date</th><th>Type</th><th>Reference ID</th><th>Amount (₹)</th><th>Description</th></tr></thead>
+            <thead><tr><th>Date</th><th>Type</th><th>Amount (₹)</th><th>Description</th></tr></thead>
             <tbody>
               {!data?.records?.length ? (
-                <tr><td colSpan={5}><div className="empty-state">No financial records.</div></td></tr>
+                <tr><td colSpan={4}><div className="empty-state">No financial records.</div></td></tr>
               ) : data.records.map(r => (
                 <tr key={r.record_id}>
                   <td>{r.transaction_date ? new Date(r.transaction_date).toLocaleDateString() : '—'}</td>
                   <td><span className={`badge ${r.record_type === 'grant' ? 'badge-success' : r.record_type === 'consultancy' ? 'badge-info' : r.record_type.includes('expense') ? 'badge-danger' : 'badge-warning'}`}>{r.record_type}</span></td>
-                  <td style={{ fontFamily: 'monospace', fontSize: '0.85em' }}>{r.grant_id || r.consultancy_id || r.project_id || '—'}</td>
                   <td>₹{Number(r.amount).toLocaleString()}</td>
-                  <td style={{ whiteSpace: 'pre-line', maxWidth: 300 }}>{r.description || '—'}</td>
+                  <td>{r.description || r.grant_id || r.consultancy_id || r.project_id || '—'}</td>
                 </tr>
               ))}
             </tbody>

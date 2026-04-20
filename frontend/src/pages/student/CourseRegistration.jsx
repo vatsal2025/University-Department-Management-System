@@ -125,6 +125,39 @@ export default function CourseRegistration({ studentId, departmentId }) {
           )
         )}
       </div>
+
+      <div className="card">
+        <div className="card-title">My Registrations (All Semesters)</div>
+        {registrations.length === 0 ? <div className="empty-state">No registrations found.</div> : (
+          <div className="table-wrapper">
+            <table>
+              <thead><tr><th>Semester</th><th>Code</th><th>Course</th><th>Credits</th><th>Status</th><th>Grade</th><th>Backlog</th><th>Action</th></tr></thead>
+              <tbody>
+                {registrations.map(r => (
+                  <tr key={r.registration_id}>
+                    <td>{r.semester_term}</td>
+                    <td>{r.course_code}</td>
+                    <td>{r.course_name}</td>
+                    <td>{r.credit_hours}</td>
+                    <td>
+                      <span className={`badge ${r.registration_status === 'completed' ? 'badge-success' : r.registration_status === 'dropped' ? 'badge-gray' : 'badge-info'}`}>
+                        {r.registration_status}
+                      </span>
+                    </td>
+                    <td>{r.grade || '—'}</td>
+                    <td>{r.backlog_flag ? <span className="badge badge-danger">Yes</span> : '—'}</td>
+                    <td>
+                      {r.registration_status === 'active' && r.semester_term === semesterTerm && (
+                        <button className="btn btn-danger btn-sm" onClick={() => handleDrop(r.course_code)}>Drop</button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -45,12 +45,6 @@ public class SecretaryService {
         supabase.patch("faculty", "faculty_id=eq." + facultyId, Map.of("active_status", false));
     }
 
-    public void deleteFaculty(String facultyId) throws Exception {
-        Map<String, Object> existing = supabase.getSingle("faculty", "faculty_id=eq." + facultyId);
-        if (existing == null) throw new RuntimeException("Faculty record not found.");
-        supabase.delete("faculty", "faculty_id=eq." + facultyId);
-    }
-
     // UC-07: Project Management
 
     public List<Map<String, Object>> getProjects(String departmentId) throws Exception {

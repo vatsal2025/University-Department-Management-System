@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getFaculty, addFaculty, updateFaculty, deactivateFaculty, forceDeactivateFaculty, deleteFacultyPermanent } from '../../api/api';
+import { getFaculty, addFaculty, updateFaculty, deactivateFaculty, forceDeactivateFaculty } from '../../api/api';
 import { getIdValidationMessage } from '../../utils/idValidation';
 
 const EMPTY = { faculty_id: '', faculty_name: '', designation: '', department_name: '', specialization: '', active_status: true };
@@ -62,17 +62,6 @@ export default function FacultyManagement({ departmentId }) {
     }
   };
 
-  const handleDelete = async (f) => {
-    if (!confirm(`Permanently delete ${f.faculty_name} (${f.faculty_id})? This cannot be undone.`)) return;
-    try {
-      await deleteFacultyPermanent(f.faculty_id);
-      setSuccess('Faculty record permanently deleted.');
-      load();
-    } catch (e) {
-      setError(e.response?.data?.error || 'Delete failed.');
-    }
-  };
-
   return (
     <div>
       <div className="section-header">
@@ -100,7 +89,7 @@ export default function FacultyManagement({ departmentId }) {
                     <td>
                       <div className="btn-group">
                         <button className="btn btn-secondary btn-sm" onClick={() => openEdit(f)}>Edit</button>
-                        <button className="btn btn-danger btn-sm" onClick={() => handleDelete(f)}>Delete</button>
+                        {f.active_status && <button className="btn btn-danger btn-sm" onClick={() => handleDeactivate(f)}>Remove</button>}
                       </div>
                     </td>
                   </tr>

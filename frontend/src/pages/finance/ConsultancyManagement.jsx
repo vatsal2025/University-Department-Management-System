@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getConsultancy, recordConsultancy } from '../../api/api';
 
-const CONSULT_ID_REGEX = /^CONSULT-[A-Za-z0-9]+-\d+$/;
 const EMPTY = { consultancy_id: '', amount: '', transaction_date: new Date().toISOString().split('T')[0], department_id: '', description: '' };
 
 export default function ConsultancyManagement() {
@@ -24,15 +23,6 @@ export default function ConsultancyManagement() {
 
   const handleSubmit = async (e) => {
     e.preventDefault(); setError('');
-    if (!CONSULT_ID_REGEX.test(form.consultancy_id)) {
-      setError('Consultancy ID must follow the format: CONSULT-<DepartmentName>-<Number> (e.g. CONSULT-CSE-001).');
-      return;
-    }
-    const idDeptSegment = form.consultancy_id.split('-')[1];
-    if (idDeptSegment.toUpperCase() !== form.department_id.trim().toUpperCase()) {
-      setError(`Consultancy ID department segment "${idDeptSegment}" must match the selected Department ID "${form.department_id}".`);
-      return;
-    }
     try {
       await recordConsultancy({ ...form, amount: parseFloat(form.amount) });
       setSuccess('Consultancy income recorded.');
@@ -46,7 +36,7 @@ export default function ConsultancyManagement() {
     <div>
       <div className="section-header">
         <h3>Consultancy Fund Management — UC-12</h3>
-        <button className="btn btn-primary" onClick={() => { setShowForm(!showForm); setError(''); setSuccess(''); }}>
+        <button className="btn btn-primary" onClick={() => { setShowForm(!showForm); setError(''); }}>
           {showForm ? 'Cancel' : '+ Record Consultancy'}
         </button>
       </div>
@@ -60,13 +50,7 @@ export default function ConsultancyManagement() {
             <div className="form-row">
               <div className="form-group">
                 <label>Consultancy ID *</label>
-                <input
-                  value={form.consultancy_id}
-                  onChange={e => setForm(p => ({ ...p, consultancy_id: e.target.value }))}
-                  placeholder="e.g. CONSULT-CSE-001"
-                  required
-                />
-                <small style={{ color: '#6b7280' }}>Format: CONSULT-&lt;DepartmentName&gt;-&lt;Number&gt;</small>
+                <input value={form.consultancy_id} onChange={e => setForm(p => ({ ...p, consultancy_id: e.target.value }))} required />
               </div>
               <div className="form-group">
                 <label>Department ID *</label>
@@ -85,19 +69,7 @@ export default function ConsultancyManagement() {
             </div>
             <div className="form-group">
               <label>Description</label>
-              <textarea
-                value={form.description}
-                onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
-                rows={5}
-                placeholder={
-                  'Project Title: [official name of the consultancy project]\n' +
-                  'Client / Industry Partner: [company or institution name]\n' +
-                  'Lead Consultant: [faculty name]\n' +
-                  'Scope of Work: [brief description of services rendered]\n' +
-                  'Contract Period: [start date] to [end date]'
-                }
-                style={{ resize: 'vertical' }}
-              />
+              <input value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} placeholder="e.g. Industry project with XYZ Ltd." />
             </div>
             <button type="submit" className="btn btn-primary">Record Consultancy</button>
           </form>
@@ -138,7 +110,7 @@ export default function ConsultancyManagement() {
                       <td>{r.department_id}</td>
                       <td>₹{Number(r.amount).toLocaleString()}</td>
                       <td>{r.transaction_date ? new Date(r.transaction_date).toLocaleDateString() : '—'}</td>
-                      <td style={{ whiteSpace: 'pre-line', maxWidth: 320 }}>{r.description || '—'}</td>
+                      <td>{r.description || '—'}</td>
                     </tr>
                   ))}
               </tbody>
